@@ -10,7 +10,6 @@ import (
 )
 
 func TestGetDebug(t *testing.T) {
-	println("4. Get: SetDebug")
 	session := requests.Sessions().SetDebug(true)
 	resp, err := session.Post("https://httpbin.org/post",
 		requests.Json{

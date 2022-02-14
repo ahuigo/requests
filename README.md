@@ -2,22 +2,7 @@
 [![license](http://dmlc.github.io/img/apache2.svg)](https://raw.githubusercontent.com/ahuigo/requests/master/LICENSE)
 
 # Requests
-Requests is an HTTP library, it is easy to use. Similar to Python requests.
-
-Warning: Session is not safe in multiple goroutines. You can not do as following:
-
-    // Bad! Do not call session in in multiple goroutines!!!!!
-    session := requests.Sessions()
-
-    // goroutine 1
-    go func(){
-       session.Post(url1) 
-    }()
-
-    // goroutine 2
-    go func(){
-       session.Post(url2) 
-    }()
+Requests is an HTTP library like python requests.
 
 
 # Installation
@@ -194,8 +179,17 @@ Warning: Session is not safe in multi goroutine. You can not do as following:
     session.SetTimeout(20)
 
 ### Debug Mode
-    
-    session.Debug = 1
+Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
+
+	session := requests.Sessions()
+
+	resp, err := session.SetDebug(true).Post(
+		"https://www.httpbin.org/post",
+		requests.Files{
+            "file1": "/README.md",
+            "file2": "/version",
+        },
+	)
 
 ### Set Authentication
     session := requests.Sessions()
