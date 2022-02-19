@@ -156,7 +156,7 @@ go get -u github.com/ahuigo/requests
         }
 	}
 
-Warning: Session is not safe in multi goroutine. You can not do as following:
+Warning: Session is not safe in multi goroutines. You can not do as following:
 
     // Bad! Do not call session in in multi goroutine!!!!!
     session := requests.Sessions()
