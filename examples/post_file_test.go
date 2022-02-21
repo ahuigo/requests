@@ -18,17 +18,17 @@ func TestPostFile(t *testing.T) {
 			"file2": path + "/version",
 		},
 	)
-    if err !=nil {
-        t.Error(err)
+	if err != nil {
+		t.Fatal(err)
 	}
 	var data = struct {
-		Files struct{
-            File2 string
-        }
+		Files struct {
+			File2 string
+		}
 	}{}
-	err = resp.Json(&data)
-	if data.Files.File2== ""{
-        t.Error("invalid response body:", resp.Text())
+	resp.Json(&data)
+	if data.Files.File2 == "" {
+		t.Error("invalid response body:", resp.Text())
 	}
 
 }

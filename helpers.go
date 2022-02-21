@@ -6,21 +6,22 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 )
 
 var VERSION string = "v0.0.0"
 
-func getVersion() string{
+func getVersion() string {
 	_, filename, _, _ := runtime.Caller(0)
 	versionFile := path.Dir(filename) + "/version"
 	version, _ := ioutil.ReadFile(versionFile)
-	VERSION = string(version)
-    return VERSION
+	VERSION = strings.TrimSpace(string(version))
+	return VERSION
 
 }
 
 func init() {
-    getVersion()
+	getVersion()
 }
 
 // open file for post upload files

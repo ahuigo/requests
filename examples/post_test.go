@@ -8,7 +8,7 @@ import (
 	_ "github.com/ahuigo/requests/init"
 )
 
-// Post params
+// Post QueryString and content-type: none
 func TestPostParams(t *testing.T) {
 	println("Test POST: post params")
 	resp, err := requests.Post(
@@ -18,7 +18,7 @@ func TestPostParams(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var data = struct {
 		Args struct {
@@ -31,9 +31,8 @@ func TestPostParams(t *testing.T) {
 	}
 }
 
-// Post Form Data
-func TestPostForm(t *testing.T) {
-	println("Test POST: post form data(x-wwww-form-urlencoded)")
+// Post Form UrlEncoded data: application/x-www-form-urlencoded
+func TestPostFormUrlEncode(t *testing.T) {
 	resp, err := requests.Post(
 		"https://www.httpbin.org/post",
 		requests.Datas{
@@ -48,13 +47,35 @@ func TestPostForm(t *testing.T) {
 			Name string
 		}
 	}{}
-	err = resp.Json(&data)
+	resp.Json(&data)
 	if data.Form.Name != "ahuigo" {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
-// Post Json Request
+// Test POST:  multipart/form-data; boundary=....
+func TestPostFormData(t *testing.T) {
+	resp, err := requests.Post(
+		"https://www.httpbin.org/post",
+		requests.FormData{
+			"name": "ahuigo",
+		},
+	)
+	if err != nil {
+		t.Error(err)
+	}
+	var data = struct {
+		Form struct {
+			Name string
+		}
+	}{}
+	resp.Json(&data)
+	if data.Form.Name != "ahuigo" {
+		t.Error("invalid response body:", resp.Text())
+	}
+}
+
+// Post Json: application/json
 func TestPostJson(t *testing.T) {
 	println("Test POST: post json data")
 	json := requests.Json{
@@ -84,28 +105,25 @@ func TestPostJson(t *testing.T) {
 	}
 }
 
-// Post QueryString: application/x-www-form-urlencoded
-func TestPostQueryString(t *testing.T) {
-	println("Test POST: raw post data ")
-	queryString := "name=Alex&age=29"
-	resp, err := requests.Post("https://www.httpbin.org/post", queryString)
+// Post Raw Bypes: text/plain
+func TestRawBytes(t *testing.T) {
+	println("Test POST: post bytes data")
+	rawText := "raw data: Hi, Jack!"
+	resp, err := requests.Post("https://www.httpbin.org/post", []byte(rawText))
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	var data = struct {
-		Form struct {
-			Name string
-			Age  string
-		}
+		Data string
 	}{}
-	err = resp.Json(&data)
-	if data.Form.Age != "29" {
+	resp.Json(&data)
+	if data.Data != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
-// Post Raw text/plain
-func TestRawString(t *testing.T) {
+// Post Raw String: text/plain
+func TestRawString1(t *testing.T) {
 	println("Test POST: raw post data ")
 	rawText := "raw data: Hi, Jack!"
 	resp, err := requests.Post("https://www.httpbin.org/post", rawText,
@@ -115,28 +133,41 @@ func TestRawString(t *testing.T) {
 		t.Fatal(err)
 	}
 	var data interface{}
-	err = resp.Json(&data)
+	resp.Json(&data)
+	if data.(map[string]interface{})["data"].(string) != rawText {
+		t.Error("invalid response body:", resp.Text())
+	}
+}
+func TestRawString2(t *testing.T) {
+	println("Test POST: raw post data ")
+	rawText := "raw data: Hi, Jack!"
+	resp, err := requests.Post("https://www.httpbin.org/post", rawText,
+		requests.ContentTypePlain,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var data interface{}
+	resp.Json(&data)
 	if data.(map[string]interface{})["data"].(string) != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
-// Post Raw text/plain (with bytes)
-func TestRawBytes(t *testing.T) {
-	println("Test POST: post bytes data")
-	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post("https://www.httpbin.org/post", []byte(rawText),
-		requests.Header{"Content-Type": "text/plain"},
-	)
+// TestPostEncodedString: application/x-www-form-urlencoded
+func TestPostEncodedString(t *testing.T) {
+	resp, err := requests.Post("https://www.httpbin.org/post", "name=Alex&age=29")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var data = struct {
-		Data string
+		Form struct {
+			Name string
+			Age  string
+		}
 	}{}
-	err = resp.Json(&data)
-	if data.Data != rawText {
+	resp.Json(&data)
+	if data.Form.Age != "29" {
 		t.Error("invalid response body:", resp.Text())
 	}
-
 }

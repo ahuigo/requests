@@ -1,7 +1,5 @@
 # Requests
 [![license](http://dmlc.github.io/img/apache2.svg)](https://raw.githubusercontent.com/ahuigo/requests/master/LICENSE)
-
-# Requests
 Requests is an HTTP library like python requests.
 
 
@@ -12,7 +10,7 @@ go get -u github.com/ahuigo/requests
 ```
 
 # Examples
-> For more examples, refer to https://github.com/ahuigo/requests/tree/master/examples
+> For more examples, refer to [examples/post](https://github.com/ahuigo/requests/blob/master/examples/post_test.go) and [all examples](https://github.com/ahuigo/requests/tree/master/examples)
 
 ## Get
     package main
@@ -51,43 +49,58 @@ go get -u github.com/ahuigo/requests
             fmt.Println(resp.Text())
         }
     }
-#### Post query string
 
-    // Post QueryString: application/x-www-form-urlencoded
-    func TestPostQueryString(t *testing.T) {
-    	queryString := "name=Alex&age=29"
-    	resp, err := requests.Post("https://www.httpbin.org/post", queryString)
-    	if err != nil {
-            t.Fatal(err)
-    	}
-    	var data = struct {
-    		Form struct{
+#### Post application/x-www-form-urlencoded 
+
+    // Post Form UrlEncoded data: application/x-www-form-urlencoded
+    func TestPostFormUrlEncode(t *testing.T) {
+        resp, err := requests.Post(
+            "https://www.httpbin.org/post",
+            requests.Datas{
+                "name": "ahuigo",
+            },
+        )
+        if err != nil {
+            t.Error(err)
+        }
+        var data = struct {
+            Form struct {
                 Name string
-                Age string
             }
-    	}{}
-    	err = resp.Json(&data)
-    	if data.Form.Age != "29"{
+        }{}
+        resp.Json(&data)
+        if data.Form.Name != "ahuigo" {
             t.Error("invalid response body:", resp.Text())
-    	}
-    }
-
-
-### Post Form Data
-    // Post Form Data
-    func TestPostForm(t *testing.T) {
-        println("Test POST: post form data")
-        data := requests.Datas{
-            "comments": "ew",
-        }
-        resp, err := requests.Post("https://www.httpbin.org/post", data)
-        if err == nil {
-            fmt.Println(resp.Text())
         }
     }
 
 
-### Post Json (default)
+### Post multipart/form-data
+
+    // Test POST:  multipart/form-data; boundary=....
+    func TestPostFormData(t *testing.T) {
+        resp, err := requests.Post(
+            "https://www.httpbin.org/post",
+            requests.FormData{
+                "name": "ahuigo",
+            },
+        )
+        if err != nil {
+            t.Error(err)
+        }
+        var data = struct {
+            Form struct {
+                Name string
+            }
+        }{}
+        resp.Json(&data)
+        if data.Form.Name != "ahuigo" {
+            t.Error("invalid response body:", resp.Text())
+        }
+    }
+
+
+### Post Json: application/json 
     func TestPostJson(t *testing.T) {
         println("Test POST: post json data")
         json := requests.Json{

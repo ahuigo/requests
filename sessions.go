@@ -51,10 +51,20 @@ type Session struct {
 
 type Header map[string]string
 type Params map[string]string
-type Datas map[string]string     // for post form
+type Datas map[string]string     // for post form urlencode
+type FormData map[string]string  // for post multipart/form-data
 type Json map[string]interface{} // for Json
 type Files map[string]string     // name ,filename
 // type AnyData interface{}         // for AnyData
+type ContentType string
+
+const (
+	ContentTypeNone       ContentType = ""
+	ContentTypeFormEncode ContentType = "application/x-www-form-urlencoded"
+	ContentTypeFormData   ContentType = "multipart/form-data"
+	ContentTypeJson       ContentType = "application/json"
+	ContentTypePlain      ContentType = "text/plain"
+)
 
 // Auth - {username,password}
 type Auth []string
@@ -63,7 +73,6 @@ type Method string
 // Sessions
 // @params method  GET|POST|PUT|DELETE|PATCH
 func Sessions() *Session {
-
 	session := new(Session)
 	session.reset()
 
@@ -190,10 +199,10 @@ func (session *Session) SetHeader(key, value string) *Session {
 
 // BuildRequest
 func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http.Request, error) {
-	contentType := "application/x-www-form-urlencoded"
-	params := []map[string]string{}
-	datas := []map[string]string{} // form data
-	files := []map[string]string{} //file data
+	var params []map[string]string
+	var datas []map[string]string // form data
+	var files []map[string]string //file data
+	dataType := ContentTypeNone
 	bodyBytes := []byte{}
 
 	for _, arg := range args {
@@ -205,42 +214,56 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 			for k, v := range a {
 				session.httpreq.Header.Set(k, v)
 			}
-		case Params:
-			params = append(params, a)
-		case Datas: //Post form data,packaged in body.
-			datas = append(datas, a)
-		case Files:
-			files = append(files, a)
 		case Auth:
 			session.httpreq.SetBasicAuth(a[0], a[1])
-		case string:
-			bodyBytes = []byte(a)
-		case []byte:
-			bodyBytes = a
 		case *http.Cookie:
 			session.SetCookie(a)
+		case ContentType:
+			dataType = a
+		case Params:
+			params = append(params, a)
+		case Datas:
+			datas = append(datas, a)
+		case FormData:
+			dataType = ContentTypeFormData
+			datas = append(datas, a)
+		case Files:
+			dataType = ContentTypeFormData
+			files = append(files, a)
+		case string:
+			dataType = ContentTypeFormEncode
+			bodyBytes = []byte(a)
+		case []byte:
+			dataType = ContentTypePlain
+			bodyBytes = a
 		case Json:
-			contentType = "application/json"
+			dataType = ContentTypeJson
 			bodyBytes = session.buildJSON(a)
 		default:
-			contentType = "application/json"
+			dataType = ContentTypeJson
 			bodyBytes = session.buildJSON(a)
 		}
-	}
-	if session.httpreq.Header.Get("Content-Type") == "" {
-		session.httpreq.Header.Set("Content-Type", contentType)
 	}
 
 	disturl, _ := buildURLParams(origurl, params...)
 
-	if len(files) > 0 {
+	switch dataType {
+	case ContentTypeFormEncode:
+		session.setContentType("application/x-www-form-urlencoded")
+		session.setBodyBytes(bodyBytes)
+	case ContentTypeFormData:
+		// multipart/form-data
 		session.buildFilesAndForms(files, datas)
-	} else if len(bodyBytes) > 0 {
-		// fmt.Printf("jsonBytes=%#v\n", string(jsonBytes))
-		session.setBodyBytes(bodyBytes) // set forms to body
-	} else {
-		Forms := session.buildForms(datas...)
-		session.setBodyForms(Forms) // set forms to body
+	case ContentTypeJson:
+		session.setContentType("application/json")
+		session.setBodyBytes(bodyBytes)
+	case ContentTypePlain:
+		session.setContentType("text/plain")
+		session.setBodyBytes(bodyBytes)
+	default:
+		session.setContentType("application/x-www-form-urlencoded")
+		formEncodeValues := session.buildFormEncode(datas...)
+		session.setBodyFormEncode(formEncodeValues)
 	}
 	//prepare to Do
 	URL, err := url.Parse(disturl)
@@ -254,6 +277,11 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 	// fmt.Printf("session-url:%#v\n", session.httpreq.URL.String())
 	return session.httpreq, nil
 
+}
+func (session *Session) setContentType(ct string) {
+	if session.httpreq.Header.Get("Content-Type") == "" {
+		session.httpreq.Header.Set("Content-Type", ct)
+	}
 }
 
 // Post -
@@ -283,7 +311,7 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 }
 
 // only set forms
-func (session *Session) setBodyForms(Forms url.Values) {
+func (session *Session) setBodyFormEncode(Forms url.Values) {
 	data := Forms.Encode()
 	session.httpreq.Body = ioutil.NopCloser(strings.NewReader(data))
 	session.httpreq.ContentLength = int64(len(data))
@@ -298,11 +326,15 @@ func (session *Session) setBodyBytes(data []byte) {
 // upload file and form
 // build to body format
 func (session *Session) buildFilesAndForms(files []map[string]string, datas []map[string]string) {
-
 	//handle file multipart
-
 	var b bytes.Buffer
 	w := multipart.NewWriter(&b)
+
+	for _, data := range datas {
+		for k, v := range data {
+			w.WriteField(k, v)
+		}
+	}
 
 	for _, file := range files {
 		for k, v := range file {
@@ -319,12 +351,6 @@ func (session *Session) buildFilesAndForms(files []map[string]string, datas []ma
 		}
 	}
 
-	for _, data := range datas {
-		for k, v := range data {
-			w.WriteField(k, v)
-		}
-	}
-
 	w.Close()
 	// set file header example:
 	// "Content-Type": "multipart/form-data; boundary=------------------------7d87eceb5520850c",
@@ -333,8 +359,8 @@ func (session *Session) buildFilesAndForms(files []map[string]string, datas []ma
 	session.Header.Set("Content-Type", w.FormDataContentType())
 }
 
-// build post Form data
-func (session *Session) buildForms(datas ...map[string]string) (Forms url.Values) {
+// build post Form encode
+func (session *Session) buildFormEncode(datas ...map[string]string) (Forms url.Values) {
 	Forms = url.Values{}
 	for _, data := range datas {
 		for key, value := range data {
