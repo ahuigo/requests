@@ -10,7 +10,6 @@ import (
 )
 
 func TestClose(t *testing.T) {
-	fmt.Println("Test Close")
 	req := requests.Sessions()
 	for i := 0; i < 10; i++ {
 		_, err := req.Post(
@@ -23,8 +22,8 @@ func TestClose(t *testing.T) {
 	spew.Dump(req)
 	fmt.Println("10 times get test end.")
 }
+
 func TestTimeout(t *testing.T) {
-	println("Test Timeout")
 	req := requests.Sessions().SetTimeout(20)
 	req.Get("http://golang.org")
 }
