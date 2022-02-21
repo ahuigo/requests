@@ -219,6 +219,7 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 		case *http.Cookie:
 			session.SetCookie(a)
 		case ContentType:
+			session.setContentType(string(a))
 			dataType = a
 		case Params:
 			params = append(params, a)
@@ -261,9 +262,11 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 		session.setContentType("text/plain")
 		session.setBodyBytes(bodyBytes)
 	default:
-		session.setContentType("application/x-www-form-urlencoded")
-		formEncodeValues := session.buildFormEncode(datas...)
-		session.setBodyFormEncode(formEncodeValues)
+		if len(datas) > 0 {
+			session.setContentType("application/x-www-form-urlencoded")
+			formEncodeValues := session.buildFormEncode(datas...)
+			session.setBodyFormEncode(formEncodeValues)
+		}
 	}
 	//prepare to Do
 	URL, err := url.Parse(disturl)
@@ -279,7 +282,7 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 
 }
 func (session *Session) setContentType(ct string) {
-	if session.httpreq.Header.Get("Content-Type") == "" {
+	if session.httpreq.Header.Get("Content-Type") == "" && ct != "" {
 		session.httpreq.Header.Set("Content-Type", ct)
 	}
 }

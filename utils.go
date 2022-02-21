@@ -28,9 +28,9 @@ func BuildCurlRequest(req *http.Request) (curl string) {
 	// 	fmt.Printf("cookie:%#v\n", cookie)
 	// }
 	// body
-	buf, _ := ioutil.ReadAll(req.Body)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(buf)) // important!!
-	if len(buf) > 0 {
+	if req.Body != nil {
+		buf, _ := ioutil.ReadAll(req.Body)
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(buf)) // important!!
 		curl += `-d ` + shellescape.Quote(string(buf))
 	}
 

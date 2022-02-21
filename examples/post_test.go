@@ -154,6 +154,23 @@ func TestRawString2(t *testing.T) {
 	}
 }
 
+func TestRawString3(t *testing.T) {
+	println("Test POST: raw post data ")
+	rawText := "raw data: Hi, Jack!"
+	resp, err := requests.Post("https://www.httpbin.org/post",
+		requests.ContentTypePlain,
+		rawText,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var data interface{}
+	resp.Json(&data)
+	if data.(map[string]interface{})["data"].(string) != rawText {
+		t.Error("invalid response body:", resp.Text())
+	}
+}
+
 // TestPostEncodedString: application/x-www-form-urlencoded
 func TestPostEncodedString(t *testing.T) {
 	resp, err := requests.Post("https://www.httpbin.org/post", "name=Alex&age=29")

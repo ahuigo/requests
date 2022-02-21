@@ -41,7 +41,7 @@ func TestSessionCookie(t *testing.T) {
 	)
 	// resp, err := req.SetCookie(cookie).Get("http://127.0.0.1:8088")
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	cookies := map[string]string{}
 	// cookies's type is `[]*http.Cookies`
