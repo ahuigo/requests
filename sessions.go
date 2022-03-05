@@ -23,7 +23,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/cookiejar"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -42,11 +41,11 @@ func SetRespHandler(fn func(*Response)) {
 type Session struct {
 	httpreq     *http.Request
 	Client      *http.Client
-	debug       bool
+	isdebug     bool
 	respHandler func(*Response)
 	// global header
-	Header  *http.Header
-	Cookies []*http.Cookie
+	Header      *http.Header
+	initCookies []*http.Cookie
 }
 
 type Header map[string]string
@@ -94,67 +93,6 @@ func SetHeader(key, value string) {
 		return
 	}
 	gHeader[key] = value
-}
-
-func (session *Session) reset() {
-	session.httpreq = &http.Request{
-		Method:     "GET",
-		Header:     make(http.Header),
-		Proto:      "HTTP/1.1",
-		ProtoMajor: 1,
-		ProtoMinor: 1,
-	}
-	session.Header = &session.httpreq.Header
-	for key, value := range gHeader {
-		session.httpreq.Header.Set(key, value)
-	}
-}
-
-func (session *Session) RequestDebug() {
-	if !session.debug {
-		return
-	}
-	fmt.Println("===========Go RequestDebug !============")
-	curl := BuildCurlRequest(session.httpreq)
-	fmt.Println(curl)
-	message, err := httputil.DumpRequestOut(session.httpreq, false)
-	if err != nil {
-		return
-	}
-	fmt.Println(string(message))
-
-	if len(session.Client.Jar.Cookies(session.httpreq.URL)) > 0 {
-		fmt.Println("Cookies:")
-		for _, cookie := range session.Client.Jar.Cookies(session.httpreq.URL) {
-			fmt.Println(cookie)
-		}
-	}
-}
-
-// cookies
-// cookies only save to Client.Jar
-// session.Cookies is temporary
-func (session *Session) SetCookie(cookie *http.Cookie) *Session {
-	session.Cookies = append(session.Cookies, cookie)
-	return session
-}
-
-func (session *Session) ClearCookies() {
-	session.Cookies = session.Cookies[0:0]
-}
-
-// ClientSetCookies -
-func (session *Session) ClientSetCookies() {
-	if len(session.Cookies) > 0 {
-		// 1. Cookies have content, Copy Cookies to Client.jar
-		// for _, cookie := range session.Cookies {
-		// 	session.httpreq.AddCookie(cookie)
-		// }
-		session.Client.Jar.SetCookies(session.httpreq.URL, session.Cookies)
-		// 2. Clear  Cookies
-		session.ClearCookies()
-	}
-
 }
 
 // set timeout s = second
@@ -207,43 +145,43 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 	bodyBytes := []byte{}
 
 	for _, arg := range args {
-		switch a := arg.(type) {
+		switch arg := arg.(type) {
 		// arg is Header , set to request header
 		case Method:
-			session.httpreq.Method = strings.ToUpper(string(a))
+			session.httpreq.Method = strings.ToUpper(string(arg))
 		case Header:
-			for k, v := range a {
+			for k, v := range arg {
 				session.httpreq.Header.Set(k, v)
 			}
 		case Auth:
-			session.httpreq.SetBasicAuth(a[0], a[1])
+			session.httpreq.SetBasicAuth(arg[0], arg[1])
 		case *http.Cookie:
-			session.SetCookie(a)
+			session.SetCookie(arg)
 		case ContentType:
-			session.setContentType(string(a))
-			dataType = a
+			session.setContentType(string(arg))
+			dataType = arg
 		case Params:
-			params = append(params, a)
+			params = append(params, arg)
 		case Datas:
-			datas = append(datas, a)
+			datas = append(datas, arg)
 		case FormData:
 			dataType = ContentTypeFormData
-			datas = append(datas, a)
+			datas = append(datas, arg)
 		case Files:
 			dataType = ContentTypeFormData
-			files = append(files, a)
+			files = append(files, arg)
 		case string:
 			dataType = ContentTypeFormEncode
-			bodyBytes = []byte(a)
+			bodyBytes = []byte(arg)
 		case []byte:
 			dataType = ContentTypePlain
-			bodyBytes = a
+			bodyBytes = arg
 		case Json, Jsoni:
 			dataType = ContentTypeJson
-			bodyBytes = session.buildJSON(a)
+			bodyBytes = session.buildJSON(arg)
 		default:
 			dataType = ContentTypeJson
-			bodyBytes = session.buildJSON(a)
+			bodyBytes = session.buildJSON(arg)
 		}
 	}
 
@@ -276,7 +214,7 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 	}
 	session.httpreq.URL = URL
 
-	session.ClientSetCookies()
+	session.clientLoadCookies()
 	// fmt.Printf("session:%#v\n", session.httpreq)
 	// fmt.Printf("session-url:%#v\n", session.httpreq.URL.String())
 	return session.httpreq, nil
@@ -379,9 +317,4 @@ func (session *Session) buildJSON(data interface{}) []byte {
 
 	// fmt.Printf("a1=%#v,jsons=%#v\nahui\n", data, string(jsonBytes))
 	return jsonBytes
-}
-
-func (session *Session) SetDebug(debug bool) *Session {
-	session.debug = debug
-	return session
 }

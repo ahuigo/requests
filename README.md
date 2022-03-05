@@ -255,7 +255,7 @@ https://github.com/ahuigo/requests/blob/master/examples/resp_test.go
 ### Fetch Response Cookies
 https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 
-    resp,_ = session.Get("https://www.httpbin.org")
+    resp,_ = session.Get("https://www.httpbin.org/get")
     coo := resp.Cookies()
     for _, c:= range coo{
         fmt.Println(c.Name,c.Value)

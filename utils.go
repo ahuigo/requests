@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
+	"net/url"
+	"strings"
 
 	"github.com/alessio/shellescape"
 )
@@ -16,17 +19,26 @@ func BuildRequest(method string, origurl string, args ...interface{}) (req *http
 	return
 }
 
-func BuildCurlRequest(req *http.Request) (curl string) {
+func BuildCurlRequest(req *http.Request, args ...interface{}) (curl string) {
+	// 1. generate curl request
 	curl = "curl -X " + req.Method + " "
 	// req.Host + req.URL.Path + "?" + req.URL.RawQuery + " " + req.Proto + " "
 	headers := getHeaders(req)
 	for _, kv := range *headers {
 		curl += `-H ` + shellescape.Quote(kv[0]+": "+kv[1]) + ` `
 	}
-	// // cookies
-	// for _, cookie := range req.Cookies() {
-	// 	fmt.Printf("cookie:%#v\n", cookie)
-	// }
+
+	// 1.2 generate curl with cookies
+	for _, arg := range args {
+		switch arg := arg.(type) {
+		case *cookiejar.Jar:
+			cookies := arg.Cookies(req.URL)
+			if len(cookies) > 0 {
+				curl += ` -H ` + shellescape.Quote(dumpCookies(cookies)) + " "
+			}
+		}
+	}
+
 	// body
 	if req.Body != nil {
 		buf, _ := ioutil.ReadAll(req.Body)
@@ -36,6 +48,15 @@ func BuildCurlRequest(req *http.Request) (curl string) {
 
 	curl += " " + shellescape.Quote(req.URL.String())
 	return curl
+}
+
+func dumpCookies(cookies []*http.Cookie) string {
+	sb := strings.Builder{}
+	sb.WriteString("Cookie: ")
+	for _, cookie := range cookies {
+		sb.WriteString(cookie.Name + "=" + url.QueryEscape(cookie.Value) + "&")
+	}
+	return strings.TrimRight(sb.String(), "&")
 }
 
 // getHeaders

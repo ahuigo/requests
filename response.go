@@ -30,7 +30,7 @@ type Response struct {
 }
 
 func (resp *Response) ResponseDebug() {
-	if !resp.session.debug {
+	if !resp.session.isdebug {
 		return
 	}
 	fmt.Println("===========Go ResponseDebug ============")
@@ -41,6 +41,7 @@ func (resp *Response) ResponseDebug() {
 	}
 
 	fmt.Println(string(message))
+	fmt.Println("-----------Go ResponseDebug ------------")
 }
 
 func (resp *Response) Content() []byte {

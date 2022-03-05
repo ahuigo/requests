@@ -25,27 +25,27 @@ func TestSendCookie(t *testing.T) {
 
 // Test session Cookie
 func TestSessionCookie(t *testing.T) {
-	println("Test: send and get cookie")
-	req := requests.Sessions().SetDebug(true)
-	cookie := &http.Cookie{
+	cookie1 := &http.Cookie{
 		Name:  "name1",
 		Value: "value1",
 		Path:  "/",
 	}
-	req.SetCookie(cookie).Get("https://www.httpbin.org")
-	resp, err := req.Get("https://www.httpbin.org",
-		&http.Cookie{
-			Name:  "name2",
-			Value: "value2",
-		},
-	)
-	// resp, err := req.SetCookie(cookie).Get("http://127.0.0.1:8088")
+	cookie2 := &http.Cookie{
+		Name:  "name2",
+		Value: "value2",
+	}
+	session := requests.Sessions().SetDebug(true)
+
+	// 1. set cookie1
+	session.SetCookie(cookie1).Get("https://www.httpbin.org/get")
+
+	// 2. set cookie2 and get all cookies
+	resp, err := session.Get("https://www.httpbin.org/get", cookie2)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cookies := map[string]string{}
 	// cookies's type is `[]*http.Cookies`
-	println("********session cookies*******")
 	for _, c := range resp.Cookies() {
 		if _, exists := cookies[c.Name]; exists {
 			t.Fatal("duplicated cookie:", c.Name, c.Value)
@@ -53,7 +53,45 @@ func TestSessionCookie(t *testing.T) {
 		cookies[c.Name] = c.Value
 	}
 	if cookies["name1"] != "value1" || cookies["name2"] != "value2" {
-		t.Fatal("Failed to send valid cookie")
+		t.Fatalf("Failed to send valid cookie(%+v)", resp.Cookies())
+	}
+
+}
+
+// Test session Cookie
+func TestSessionCookieWithClone(t *testing.T) {
+	url := "https://www.httpbin.org/get"
+	url = "http://m:4500/echo/get"
+	cookie1 := &http.Cookie{
+		Name:  "name1",
+		Value: "value1",
+		Path:  "/",
+	}
+	cookie2 := &http.Cookie{
+		Name:  "name2",
+		Value: "value2",
+	}
+	session := requests.Sessions().SetDebug(true)
+
+	// 1. set cookie1
+	session.SetCookie(cookie1).Get(url)
+
+	// 2. set cookie2 and get all cookies
+	session = session.Clone()
+	resp, err := session.Get(url, cookie2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cookies := map[string]string{}
+	// cookies's type is `[]*http.Cookies`
+	for _, c := range resp.Cookies() {
+		if _, exists := cookies[c.Name]; exists {
+			t.Fatal("duplicated cookie:", c.Name, c.Value)
+		}
+		cookies[c.Name] = c.Value
+	}
+	if cookies["name1"] != "value1" || cookies["name2"] != "value2" {
+		t.Fatalf("Failed to send valid cookie(%+v)", resp.Cookies())
 	}
 
 }
