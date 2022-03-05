@@ -102,16 +102,10 @@ go get -u github.com/ahuigo/requests
 
 ### Post Json: application/json 
     func TestPostJson(t *testing.T) {
-        println("Test POST: post json data")
+    	// You can also use `json := requests.Jsoni(anyTypeData)`
         json := requests.Json{
             "key": "value",
         }
-        /*
-        //it still works! 
-        json = map[string]interface{}{
-            "key": "value",
-        }
-        */
         resp, err := requests.Post("https://www.httpbin.org/post", json)
         if err == nil {
             fmt.Println(resp.Text())
