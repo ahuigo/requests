@@ -53,7 +53,8 @@ type Header map[string]string
 type Params map[string]string
 type Datas map[string]string     // for post form urlencode
 type FormData map[string]string  // for post multipart/form-data
-type Json map[string]interface{} // for Json
+type Json map[string]interface{} // for Json map
+type Jsoni interface{}           // for Json interface
 type Files map[string]string     // name ,filename
 // type AnyData interface{}         // for AnyData
 type ContentType string
@@ -237,7 +238,7 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 		case []byte:
 			dataType = ContentTypePlain
 			bodyBytes = a
-		case Json:
+		case Json, Jsoni:
 			dataType = ContentTypeJson
 			bodyBytes = session.buildJSON(a)
 		default:

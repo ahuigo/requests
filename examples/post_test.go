@@ -78,15 +78,10 @@ func TestPostFormData(t *testing.T) {
 // Post Json: application/json
 func TestPostJson(t *testing.T) {
 	println("Test POST: post json data")
+	// You can also use `json := requests.Jsoni(anyTypeData)`
 	json := requests.Json{
 		"name": "Alex",
 	}
-	/*
-		    //it still works!
-			json = map[string]interface{}{
-				"key": "value",
-			}
-	*/
 	resp, err := requests.Post("https://www.httpbin.org/post", json)
 	if err != nil {
 		t.Error(err)
