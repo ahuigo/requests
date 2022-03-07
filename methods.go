@@ -15,30 +15,30 @@ package requests
 /**************post/get/delete/patch*************************/
 func Get(origurl string, args ...interface{}) (resp *Response, err error) {
 	// call request Get
-	resp, err = Sessions().Get(origurl, args...)
+	resp, err = NewSession().Get(origurl, args...)
 	return resp, err
 }
 
 func Post(origurl string, args ...interface{}) (resp *Response, err error) {
-	resp, err = Sessions().Post(origurl, args...)
+	resp, err = NewSession().Post(origurl, args...)
 	return
 }
 
 // Put
 func Put(origurl string, args ...interface{}) (resp *Response, err error) {
-	resp, err = Sessions().Put(origurl, args...)
+	resp, err = NewSession().Put(origurl, args...)
 	return
 }
 
 // Delete
 func Delete(origurl string, args ...interface{}) (resp *Response, err error) {
-	resp, err = Sessions().Delete(origurl, args...)
+	resp, err = NewSession().Delete(origurl, args...)
 	return
 }
 
 // Patch
 func Patch(origurl string, args ...interface{}) (resp *Response, err error) {
-	resp, err = Sessions().Patch(origurl, args...)
+	resp, err = NewSession().Patch(origurl, args...)
 	return
 }
 

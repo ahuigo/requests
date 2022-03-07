@@ -23,25 +23,26 @@ func TestGetJson(t *testing.T) {
 	}
 }
 
-type HbResponse struct {
-	Args map[string]string `json:"args"`
-}
-
 // Get with params
 func TestGetParams(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
 	params := requests.Params{"name": "ahuigo", "page": "1"}
-	resp, err := requests.Get("https://httpbin.org/get", params)
+	resp, err := requests.Get(ts.URL+"/get", params)
 
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err == nil {
+		type HbResponse struct {
+			Args map[string]string `json:"args"`
+		}
 		json := &HbResponse{}
 		if err := resp.Json(&json); err != nil {
-			t.Fatal(err)
+			t.Fatalf("bad json:%s", resp.Text())
 		}
 		if json.Args["name"] != "ahuigo" {
 			t.Fatal("Invalid response: " + resp.Text())
 		}
-	}
-	if err != nil {
-		t.Fatal(err)
 	}
 }

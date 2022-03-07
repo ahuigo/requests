@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/ahuigo/requests"
@@ -9,15 +9,18 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	println("3. Get: Set Auth")
+	ts := createEchoServer()
+	defer ts.Close()
 	// test authentication usernae,password
-	//documentation https://www.httpwatch.com/httpgallery/authentication/#showExample10
 	resp, err := requests.Get(
-		"https://www.httpwatch.com/httpgallery/authentication/authenticatedimage/default.aspx?0.45874470316137206",
+		ts.URL+"/echo",
 		requests.Auth{"httpwatch", "foo"},
 	)
-	if err == nil {
-		fmt.Println(resp.R)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(resp.Text(), "Authorization: Basic ") {
+		t.Fatal("bad auth body:\n" + resp.Text())
 	}
 	// this save file test PASS
 	// resp.SaveFile("auth.jpeg")

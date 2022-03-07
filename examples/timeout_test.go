@@ -9,7 +9,7 @@ import (
 )
 
 func TestClose(t *testing.T) {
-	req := requests.Sessions()
+	req := requests.NewSession()
 	for i := 0; i < 10; i++ {
 		_, err := req.Post(
 			"http://localhost:1337/requests",
@@ -23,6 +23,6 @@ func TestClose(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	req := requests.Sessions().SetTimeout(20)
+	req := requests.NewSession().SetTimeout(20)
 	req.Get("http://golang.org")
 }

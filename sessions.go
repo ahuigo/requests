@@ -69,9 +69,9 @@ const (
 type Auth []string
 type Method string
 
-// Sessions
+// NewSession
 // @params method  GET|POST|PUT|DELETE|PATCH
-func Sessions() *Session {
+func NewSession() *Session {
 	session := new(Session)
 	session.reset()
 
