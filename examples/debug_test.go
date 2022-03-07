@@ -1,12 +1,10 @@
 package examples
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/ahuigo/requests"
-	_ "github.com/ahuigo/requests/init"
 )
 
 func TestGetDebug(t *testing.T) {
@@ -20,7 +18,10 @@ func TestGetDebug(t *testing.T) {
 			Value: "1",
 		},
 	)
-	if err == nil {
-		fmt.Println("response text:", resp.Text())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Text() == "" {
+		t.Fatalf("bad response")
 	}
 }

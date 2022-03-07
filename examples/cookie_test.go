@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/ahuigo/requests"
-	_ "github.com/ahuigo/requests/init"
 )
 
 func TestSendCookie(t *testing.T) {

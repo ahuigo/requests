@@ -28,13 +28,12 @@ import (
 	"time"
 )
 
-var respHandler func(*Response)
+var respHandler func(*Response) error
 var gHeader = map[string]string{
 	"User-Agent": "Go-requests-" + getVersion(),
 }
 
-// SetRespHandler
-func SetRespHandler(fn func(*Response)) {
+func SetRespHandler(fn func(*Response) error) {
 	respHandler = fn
 }
 
@@ -42,7 +41,7 @@ type Session struct {
 	httpreq     *http.Request
 	Client      *http.Client
 	isdebug     bool
-	respHandler func(*Response)
+	respHandler func(*Response) error
 	// global header
 	Header      *http.Header
 	initCookies []*http.Cookie
@@ -118,8 +117,7 @@ func (session *Session) Proxy(proxyurl string) {
 	}
 }
 
-// SetRespHandler -
-func (session *Session) SetRespHandler(fn func(*Response)) *Session {
+func (session *Session) SetRespHandler(fn func(*Response) error) *Session {
 	session.respHandler = fn
 	return session
 }
@@ -241,15 +239,15 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 	req_dup := *session
 	resp.session = &req_dup
 	resp.ResponseDebug()
-	resp.Content()
 	session.reset()
-	if respHandler != nil {
-		respHandler(resp)
-	}
+
+	// global respnse hander & session response handler
 	if session.respHandler != nil {
-		session.respHandler(resp)
+		err = session.respHandler(resp)
+	} else if respHandler != nil {
+		err = respHandler(resp)
 	}
-	return resp, nil
+	return resp, err
 }
 
 // only set forms

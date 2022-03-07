@@ -15,6 +15,7 @@ package requests
 import (
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -33,7 +34,7 @@ func (resp *Response) ResponseDebug() {
 	if !resp.session.isdebug {
 		return
 	}
-	fmt.Println("===========Go ResponseDebug ============")
+	fmt.Println("===========ResponseDebug ============")
 
 	message, err := httputil.DumpResponse(resp.R, false)
 	if err != nil {
@@ -41,7 +42,7 @@ func (resp *Response) ResponseDebug() {
 	}
 
 	fmt.Println(string(message))
-	fmt.Println("-----------Go ResponseDebug ------------")
+	fmt.Println("-----------ResponseDebug(end) ------------")
 }
 
 func (resp *Response) Content() []byte {
@@ -74,6 +75,18 @@ func (resp *Response) Text() string {
 	}
 	resp.text = string(resp.content)
 	return resp.text
+}
+
+func (resp *Response) RaiseForStatus() (code int, err error) {
+	code = resp.R.StatusCode
+	if resp.R.StatusCode >= 400 && resp.R.StatusCode != 401 {
+		err = errors.New(resp.Text())
+	}
+	return
+}
+
+func (resp *Response) StatusCode() (code int) {
+	return resp.R.StatusCode
 }
 
 func (resp *Response) SaveFile(filename string) error {

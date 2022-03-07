@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/ahuigo/requests"
-	_ "github.com/ahuigo/requests/init"
 )
 
 func TestProxy(t *testing.T) {

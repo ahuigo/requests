@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/ahuigo/requests"
-	_ "github.com/ahuigo/requests/init"
 	"github.com/davecgh/go-spew/spew"
 )
 
