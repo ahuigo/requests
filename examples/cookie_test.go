@@ -60,7 +60,6 @@ func TestSessionCookie(t *testing.T) {
 // Test session Cookie
 func TestSessionCookieWithClone(t *testing.T) {
 	url := "https://www.httpbin.org/get"
-	url = "http://m:4500/echo/get"
 	cookie1 := &http.Cookie{
 		Name:  "name1",
 		Value: "value1",

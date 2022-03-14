@@ -96,7 +96,7 @@ func SetHeader(key, value string) {
 
 // set timeout s = second
 func (session *Session) SetTimeout(n time.Duration) *Session {
-	session.Client.Timeout = time.Duration(n * time.Second)
+	session.Client.Timeout = n
 	return session
 }
 
