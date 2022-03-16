@@ -1,22 +1,22 @@
 package examples
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/ahuigo/requests"
 )
 
-// Get Json Response
+// Get example: fetch json response
 func TestGetJson(t *testing.T) {
-	println("Test Get: fetch json response")
-	resp, err := requests.Get("https://httpbin.org/json")
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	// resp, err := requests.Get("https://httpbin.org/json")
+	resp, err := requests.Get(ts.URL + "/get")
 	if err == nil {
 		var json map[string]interface{}
 		err = resp.Json(&json)
-		for k, v := range json {
-			fmt.Println(k, v)
-		}
+		t.Logf("response json:%#v\n", json)
 	}
 	if err != nil {
 		t.Fatal(err)
@@ -27,6 +27,7 @@ func TestGetJson(t *testing.T) {
 func TestGetParams(t *testing.T) {
 	ts := createHttpbinServer()
 	defer ts.Close()
+
 	params := requests.Params{"name": "ahuigo", "page": "1"}
 	resp, err := requests.Get(ts.URL+"/get", params)
 
