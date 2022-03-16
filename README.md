@@ -131,7 +131,7 @@ go get -u github.com/ahuigo/requests
 	path, _ := os.Getwd()
 	session := requests.NewSession()
 
-	resp, err := session.SetDebug(true).Post(
+	resp, err := session.SetDebug().Post(
 		"https://www.httpbin.org/post",
 		requests.Files{
             "file1": path + "/README.md",
@@ -183,14 +183,14 @@ Warning: Session is not safe in multi goroutines. You can not do as following:
 ### SetTimeout
 
     session := Requests.NewSession()
-    session.SetTimeout(20)
+    session.SetTimeout(20*time.Second)
 
 ### Debug Mode
 Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
 
 	session := requests.NewSession()
 
-	resp, err := session.SetDebug(true).Post(
+	resp, err := session.SetDebug().Post(
 		"https://www.httpbin.org/post",
 		requests.Files{
             "file1": "/README.md",
@@ -249,8 +249,8 @@ two or more headers ...
 ### Fetch Response Body
 https://github.com/ahuigo/requests/blob/master/examples/resp_test.go
 
-    fmt.Println(resp.Text())
-    fmt.Println(resp.Content())
+    fmt.Println(resp.Text())    // string
+    fmt.Println(resp.Body())    //[]byte
 
 ### Fetch Response Cookies
 https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go

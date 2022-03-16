@@ -17,7 +17,7 @@ func TestSendHeaders(t *testing.T) {
 
 // Set session headers
 func TestSendSessionHeader(t *testing.T) {
-	session := requests.NewSession()
+	session := requests.R()
 	session.SetHeader("accept-encoding", "gzip, deflate, br")
 	session.Get("http://www.zhanluejia.net.cn")
 }

@@ -3,13 +3,14 @@ package examples
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/ahuigo/requests"
 	"github.com/davecgh/go-spew/spew"
 )
 
 func TestClose(t *testing.T) {
-	req := requests.NewSession()
+	req := requests.R()
 	for i := 0; i < 10; i++ {
 		_, err := req.Post(
 			"http://localhost:1337/requests",
@@ -23,6 +24,6 @@ func TestClose(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
-	req := requests.NewSession().SetTimeout(20)
+	req := requests.R().SetTimeout(time.Second)
 	req.Get("http://golang.org")
 }

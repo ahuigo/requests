@@ -21,13 +21,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"time"
 )
 
 type Response struct {
-	R       *http.Response
-	content []byte
-	text    string
-	session *Session
+	R         *http.Response
+	body      []byte
+	text      string
+	session   *Session
+	startTime time.Time
+	endTime   time.Time
 }
 
 func (resp *Response) ResponseDebug() {
@@ -45,10 +48,10 @@ func (resp *Response) ResponseDebug() {
 	fmt.Println("-----------ResponseDebug(end) ------------")
 }
 
-func (resp *Response) Content() []byte {
+func (resp *Response) Body() []byte {
 	var err error
-	if resp.content != nil {
-		return resp.content
+	if resp.body != nil {
+		return resp.body
 	}
 	defer resp.R.Body.Close()
 
@@ -61,20 +64,27 @@ func (resp *Response) Content() []byte {
 		Body = reader
 	}
 
-	resp.content, err = ioutil.ReadAll(Body)
+	resp.body, err = ioutil.ReadAll(Body)
 	if err != nil {
 		return nil
 	}
 
-	return resp.content
+	return resp.body
 }
 
 func (resp *Response) Text() string {
-	if resp.content == nil {
-		resp.Content()
+	if resp.body == nil {
+		resp.Body()
 	}
-	resp.text = string(resp.content)
+	resp.text = string(resp.body)
 	return resp.text
+}
+
+func (resp *Response) Size() int {
+	if resp.body == nil {
+		resp.Body()
+	}
+	return len(resp.body)
 }
 
 func (resp *Response) RaiseForStatus() (code int, err error) {
@@ -89,9 +99,17 @@ func (resp *Response) StatusCode() (code int) {
 	return resp.R.StatusCode
 }
 
+func (resp *Response) Time() time.Duration {
+	return resp.endTime.Sub(resp.startTime)
+}
+
+func (resp *Response) Header() http.Header {
+	return resp.R.Header
+}
+
 func (resp *Response) SaveFile(filename string) error {
-	if resp.content == nil {
-		resp.Content()
+	if resp.body == nil {
+		resp.Body()
 	}
 	f, err := os.Create(filename)
 	if err != nil {
@@ -99,17 +117,17 @@ func (resp *Response) SaveFile(filename string) error {
 	}
 	defer f.Close()
 
-	_, err = f.Write(resp.content)
+	_, err = f.Write(resp.body)
 	f.Sync()
 
 	return err
 }
 
 func (resp *Response) Json(v interface{}) error {
-	if resp.content == nil {
-		resp.Content()
+	if resp.body == nil {
+		resp.Body()
 	}
-	return json.Unmarshal(resp.content, v)
+	return json.Unmarshal(resp.body, v)
 }
 
 func (resp *Response) Cookies() (cookies []*http.Cookie) {

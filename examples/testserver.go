@@ -14,6 +14,7 @@ func createHttpbinServer() (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/get":
+			w.Header().Set("Content-Type", "application/json")
 			body, _ := ioutil.ReadAll(r.Body)
 			m := map[string]interface{}{
 				"args": parseRequestArgs(r),

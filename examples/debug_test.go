@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetDebug(t *testing.T) {
-	session := requests.NewSession().SetDebug(true)
+	session := requests.R().SetDebug()
 	resp, err := session.Post("https://httpbin.org/post",
 		requests.Json{
 			"name": "ahuigo",

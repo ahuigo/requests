@@ -69,7 +69,12 @@ const (
 type Auth []string
 type Method string
 
-// NewSession
+// New request session
+func R() *Session {
+	return NewSession()
+}
+
+// New request session
 // @params method  GET|POST|PUT|DELETE|PATCH
 func NewSession() *Session {
 	session := new(Session)
@@ -228,14 +233,18 @@ func (session *Session) setContentType(ct string) {
 func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
 	session.BuildRequest(origurl, args...)
 	session.RequestDebug()
+	startTime := time.Now()
 	res, err := session.Client.Do(session.httpreq)
 
 	if err != nil {
 		return nil, errors.New(session.httpreq.Method + " " + origurl + " " + err.Error())
 	}
 
-	resp = &Response{}
-	resp.R = res
+	resp = &Response{
+		R:         res,
+		startTime: startTime,
+		endTime:   time.Now(),
+	}
 	req_dup := *session
 	resp.session = &req_dup
 	resp.ResponseDebug()

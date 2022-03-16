@@ -20,7 +20,11 @@ func (session *Session) RequestDebug() {
 	fmt.Println("-----Go RequestDebug(end)!------------")
 }
 
-func (session *Session) SetDebug(debug bool) *Session {
-	session.isdebug = debug
+func (session *Session) SetDebug() *Session {
+	session.isdebug = true
+	return session
+}
+func (session *Session) DisableDebug() *Session {
+	session.isdebug = false
 	return session
 }

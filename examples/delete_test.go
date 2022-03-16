@@ -13,7 +13,7 @@ func TestDeleteForm(t *testing.T) {
 	data := requests.Datas{
 		"comments": "ew",
 	}
-	session := requests.NewSession() //.SetDebug(true)
+	session := requests.R() //.SetDebug()
 	resp, err := session.Delete("https://www.httpbin.org/delete", data)
 	if err == nil {
 		fmt.Println(resp.Text())

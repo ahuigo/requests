@@ -33,7 +33,7 @@ func TestSessionCookie(t *testing.T) {
 		Name:  "name2",
 		Value: "value2",
 	}
-	session := requests.NewSession().SetDebug(true)
+	session := requests.R().SetDebug()
 
 	// 1. set cookie1
 	session.SetCookie(cookie1).Get("https://www.httpbin.org/get")
@@ -69,7 +69,7 @@ func TestSessionCookieWithClone(t *testing.T) {
 		Name:  "name2",
 		Value: "value2",
 	}
-	session := requests.NewSession().SetDebug(true)
+	session := requests.R().SetDebug()
 
 	// 1. set cookie1
 	session.SetCookie(cookie1).Get(url)

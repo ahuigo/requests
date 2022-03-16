@@ -13,7 +13,7 @@ func TestSessionWithCookie(t *testing.T) {
 			Count string `json:"count"`
 		}
 	}
-	session := r.NewSession()
+	session := r.R()
 	// set cookies: count=100
 	session.Get("https://httpbin.org/cookies/set?count=100")
 	// get cookies
