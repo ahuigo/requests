@@ -261,6 +261,23 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
         fmt.Println(c.Name,c.Value)
     }
 
+### Response examples
+
+    func TestResponse(t *testing.T) {
+        resp, _ := requests.Get("https://httpbin.org/get")
+        fmt.Println("Status Code:", resp.StatusCode())
+        fmt.Println("Time:", resp.Time())
+        fmt.Println("Size:", resp.Size())
+        fmt.Println("Headers:")
+        for key, value := range resp.Header() {
+            fmt.Println(key, "=", value)
+        }
+        fmt.Println("Cookies:")
+        for i, cookie := range resp.Cookies() {
+            fmt.Printf("cookie%d: name:%s value:%s\n", i, cookie.Name, cookie.Value)
+        }
+    }
+
 ## Custom
 
 ### Custom User Agent
@@ -297,16 +314,17 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 
 
 # Feature Support
-  - Set headers
-  - Set params
+  - Set headers, params, body, json, ....
   - Multipart File Uploads
   - NewSession with Cookie Persistence
   - Proxy
   - Authentication
   - JSON
   - Chunked Requests
-  - Debug
+  - Debug Mode
   - SetTimeout
+  - [] middleware
+  - [] traceInfo(like resty's clientTrace)
 
 # Thanks
 This project is inspired by [github.com/asmcos/requests](http://github.com/asmcos/requests). 
