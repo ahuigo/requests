@@ -35,14 +35,23 @@ type Response struct {
 	endTime   time.Time
 }
 
-func BuildResponse(response *http.Response, req *http.Request, client *http.Client) *Response {
+func BuildResponse(response *http.Response) *Response {
 	r := &Response{
-		R:       response,
-		httpreq: req,
-		client:  client,
+		R: response,
 	}
 	r.Body()
 	return r
+}
+func (resp *Response) SetClientReq(req *http.Request, client *http.Client) *Response {
+	resp.client = client
+	resp.httpreq = req
+	return resp
+}
+
+func (resp *Response) SetStartEndTime(start, end time.Time) *Response {
+	resp.startTime = start
+	resp.endTime = end
+	return resp
 }
 
 func (resp *Response) ResponseDebug() {
@@ -58,12 +67,6 @@ func (resp *Response) ResponseDebug() {
 
 	fmt.Println(string(message))
 	fmt.Println("-----------ResponseDebug(end) ------------")
-}
-
-func (resp *Response) SetStartEndTime(start, end time.Time) *Response {
-	resp.startTime = start
-	resp.endTime = end
-	return resp
 }
 
 func (resp *Response) Body() []byte {
@@ -147,6 +150,9 @@ func (resp *Response) Cookies() (cookies []*http.Cookie) {
 	httpreq := resp.httpreq
 	client := resp.client
 
+	if httpreq == nil || client == nil {
+		return cookies
+	}
 	cookies = client.Jar.Cookies(httpreq.URL)
 
 	return cookies

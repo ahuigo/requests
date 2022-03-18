@@ -6,7 +6,7 @@ import (
 	r "github.com/ahuigo/requests"
 )
 
-// Test Session with cookies
+// Test Session with cookie
 func TestSessionWithCookie(t *testing.T) {
 	var data struct {
 		Cookies struct {
@@ -14,9 +14,9 @@ func TestSessionWithCookie(t *testing.T) {
 		}
 	}
 	session := r.R()
-	// set cookies: count=100
+	// set cookie: count=100
 	session.Get("https://httpbin.org/cookies/set?count=100")
-	// get cookies
+	// get cookie
 	resp, err := session.Get("https://httpbin.org/cookies")
 	if err == nil {
 		resp.Json(&data)

@@ -12,13 +12,11 @@ func TestResponseBuilder(t *testing.T) {
 	var data = 1
 	responseBytes, _ := json.Marshal(data)
 
-	req, _ := requests.BuildRequest("GET", "http://ahuigo.com/")
-	client := requests.NewHttpClient()
 	respRecorder := httptest.NewRecorder()
 	respRecorder.Write(responseBytes)
 
 	// build response
-	wrapResp := requests.BuildResponse(respRecorder.Result(), req, client)
+	wrapResp := requests.BuildResponse(respRecorder.Result())
 
 	var ndata int
 	wrapResp.Json(&ndata)

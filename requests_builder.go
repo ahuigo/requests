@@ -1,36 +1,41 @@
-/* Copyright（2） 2018 by  asmcos and ahuigo .
-Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-     http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-*/
-
 package requests
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strings"
-	"time"
 )
 
-var respHandler func(*Response) error
+// New request session
+func R() *Session {
+	return NewSession()
+}
 
-func SetRespHandler(fn func(*Response) error) {
-	respHandler = fn
+// New request session
+// @params method  GET|POST|PUT|DELETE|PATCH
+func NewSession() *Session {
+	session := new(Session)
+	session.reset()
+
+	session.Client = NewHttpClient()
+
+	return session
+}
+
+func NewHttpClient() *http.Client {
+	// cookiejar.New source code return jar, nil
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+	return client
 }
 
 type Session struct {
@@ -64,46 +69,6 @@ const (
 // Auth - {username,password}
 type Auth []string
 type Method string
-
-// set timeout s = second
-func (session *Session) SetTimeout(n time.Duration) *Session {
-	session.Client.Timeout = n
-	return session
-}
-
-func (session *Session) Close() {
-	session.httpreq.Close = true
-}
-
-func (session *Session) Proxy(proxyurl string) {
-	urli := url.URL{}
-	urlproxy, err := urli.Parse(proxyurl)
-	if err != nil {
-		fmt.Println("Set proxy failed")
-		return
-	}
-	session.Client.Transport = &http.Transport{
-		Proxy:           http.ProxyURL(urlproxy),
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-}
-
-func (session *Session) SetRespHandler(fn func(*Response) error) *Session {
-	session.respHandler = fn
-	return session
-}
-
-// SetMethod
-func (session *Session) SetMethod(method string) *Session {
-	session.httpreq.Method = strings.ToUpper(method)
-	return session
-}
-
-// SetHeader
-func (session *Session) SetHeader(key, value string) *Session {
-	session.Header.Set(key, value)
-	return session
-}
 
 // BuildRequest
 func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http.Request, error) {
@@ -189,42 +154,36 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 	return session.httpreq, nil
 
 }
+func (session *Session) reset() {
+	session.httpreq = &http.Request{
+		Method:     "GET",
+		Header:     make(http.Header),
+		Proto:      "HTTP/1.1",
+		ProtoMajor: 1,
+		ProtoMinor: 1,
+	}
+	session.Header = &session.httpreq.Header
+	for key, value := range gHeader {
+		session.httpreq.Header.Set(key, value)
+	}
+}
+
+func (session *Session) Clone() *Session {
+	newSession := R()
+	newSession.isdebug = session.isdebug
+
+	// 1. clone temp cookies
+	newSession.initCookies = session.initCookies
+
+	// 2. clone client cookies
+	newSession.clientCloneCookies(session.Client)
+	return newSession
+}
+
 func (session *Session) setContentType(ct string) {
 	if session.httpreq.Header.Get("Content-Type") == "" && ct != "" {
 		session.httpreq.Header.Set("Content-Type", ct)
 	}
-}
-
-// Post -
-func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
-	session.BuildRequest(origurl, args...)
-	session.RequestDebug()
-	startTime := time.Now()
-	res, err := session.Client.Do(session.httpreq)
-
-	if err != nil {
-		return nil, errors.New(session.httpreq.Method + " " + origurl + " " + err.Error())
-	}
-
-	resp = &Response{
-		R:         res,
-		startTime: startTime,
-		endTime:   time.Now(),
-		httpreq:   session.httpreq,
-		client:    session.Client,
-		isdebug:   session.isdebug,
-	}
-	resp.SetStartEndTime(startTime, time.Now()).Body()
-	resp.ResponseDebug()
-	session.reset()
-
-	// global respnse hander & session response handler
-	if session.respHandler != nil {
-		err = session.respHandler(resp)
-	} else if respHandler != nil {
-		err = respHandler(resp)
-	}
-	return resp, err
 }
 
 // only set forms
