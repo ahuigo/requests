@@ -1,6 +1,47 @@
 package requests
 
-import "net/http"
+import (
+	"net/http"
+	"net/http/cookiejar"
+)
+
+var gHeader = map[string]string{
+	"User-Agent": "Go-requests-" + getVersion(),
+}
+
+// Set global header
+func SetHeader(key, value string) {
+	if value == "" {
+		delete(gHeader, key)
+		return
+	}
+	gHeader[key] = value
+}
+
+// New request session
+func R() *Session {
+	return NewSession()
+}
+
+// New request session
+// @params method  GET|POST|PUT|DELETE|PATCH
+func NewSession() *Session {
+	session := new(Session)
+	session.reset()
+
+	session.Client = NewHttpClient()
+
+	return session
+}
+
+func NewHttpClient() *http.Client {
+	// cookiejar.New source code return jar, nil
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+	return client
+}
 
 func (session *Session) reset() {
 	session.httpreq = &http.Request{

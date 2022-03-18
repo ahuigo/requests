@@ -22,16 +22,12 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
 )
 
 var respHandler func(*Response) error
-var gHeader = map[string]string{
-	"User-Agent": "Go-requests-" + getVersion(),
-}
 
 func SetRespHandler(fn func(*Response) error) {
 	respHandler = fn
@@ -68,36 +64,6 @@ const (
 // Auth - {username,password}
 type Auth []string
 type Method string
-
-// New request session
-func R() *Session {
-	return NewSession()
-}
-
-// New request session
-// @params method  GET|POST|PUT|DELETE|PATCH
-func NewSession() *Session {
-	session := new(Session)
-	session.reset()
-
-	session.Client = &http.Client{}
-
-	// cookiejar.New source code return jar, nil
-	jar, _ := cookiejar.New(nil)
-
-	session.Client.Jar = jar
-
-	return session
-}
-
-// Set global header
-func SetHeader(key, value string) {
-	if value == "" {
-		delete(gHeader, key)
-		return
-	}
-	gHeader[key] = value
-}
 
 // set timeout s = second
 func (session *Session) SetTimeout(n time.Duration) *Session {
@@ -244,9 +210,11 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 		R:         res,
 		startTime: startTime,
 		endTime:   time.Now(),
+		httpreq:   session.httpreq,
+		client:    session.Client,
+		isdebug:   session.isdebug,
 	}
-	req_dup := *session
-	resp.session = &req_dup
+	resp.SetStartEndTime(startTime, time.Now()).Body()
 	resp.ResponseDebug()
 	session.reset()
 

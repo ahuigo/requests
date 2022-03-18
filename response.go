@@ -28,13 +28,25 @@ type Response struct {
 	R         *http.Response
 	body      []byte
 	text      string
-	session   *Session
+	httpreq   *http.Request
+	client    *http.Client
+	isdebug   bool
 	startTime time.Time
 	endTime   time.Time
 }
 
+func BuildResponse(response *http.Response, req *http.Request, client *http.Client) *Response {
+	r := &Response{
+		R:       response,
+		httpreq: req,
+		client:  client,
+	}
+	r.Body()
+	return r
+}
+
 func (resp *Response) ResponseDebug() {
-	if !resp.session.isdebug {
+	if !resp.isdebug {
 		return
 	}
 	fmt.Println("===========ResponseDebug ============")
@@ -48,15 +60,22 @@ func (resp *Response) ResponseDebug() {
 	fmt.Println("-----------ResponseDebug(end) ------------")
 }
 
+func (resp *Response) SetStartEndTime(start, end time.Time) *Response {
+	resp.startTime = start
+	resp.endTime = end
+	return resp
+}
+
 func (resp *Response) Body() []byte {
 	var err error
 	if resp.body != nil {
 		return resp.body
 	}
+	resp.body = []byte{}
 	defer resp.R.Body.Close()
 
 	var Body = resp.R.Body
-	if resp.R.Header.Get("Content-Encoding") == "gzip" && resp.session.Header.Get("Accept-Encoding") != "" {
+	if resp.R.Header.Get("Content-Encoding") == "gzip" {
 		reader, err := gzip.NewReader(Body)
 		if err != nil {
 			return nil
@@ -73,17 +92,11 @@ func (resp *Response) Body() []byte {
 }
 
 func (resp *Response) Text() string {
-	if resp.body == nil {
-		resp.Body()
-	}
 	resp.text = string(resp.body)
 	return resp.text
 }
 
 func (resp *Response) Size() int {
-	if resp.body == nil {
-		resp.Body()
-	}
 	return len(resp.body)
 }
 
@@ -131,8 +144,8 @@ func (resp *Response) Json(v interface{}) error {
 }
 
 func (resp *Response) Cookies() (cookies []*http.Cookie) {
-	httpreq := resp.session.httpreq
-	client := resp.session.Client
+	httpreq := resp.httpreq
+	client := resp.client
 
 	cookies = client.Jar.Cookies(httpreq.URL)
 

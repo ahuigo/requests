@@ -323,8 +323,9 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
   - Chunked Requests
   - Debug Mode
   - SetTimeout
-  - [] middleware
-  - [] traceInfo(like resty's clientTrace)
+  - [] Middleware
+  - [] Support traceInfo(like resty's clientTrace and gout)
+  - [] Support stream and notParseResponse
 
 # Thanks
 This project is inspired by [github.com/asmcos/requests](http://github.com/asmcos/requests). 
