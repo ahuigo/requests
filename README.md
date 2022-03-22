@@ -318,14 +318,14 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
   - Multipart File Uploads
   - NewSession with Cookie Persistence
   - Proxy
+      - Http Proxy
+      - [] Socks5 Proxy
   - Authentication
   - JSON
   - Chunked Requests
   - Debug Mode
       - Support Curl Dump
   - SetTimeout
-  - [] Http Proxy
-  - [] Socks5 Proxy
   - [] Support traceInfo(like resty's clientTrace and gout)
   - [] Support http stream and callback(notParseResponse)
   - [] Remove Global Setting
