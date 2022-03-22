@@ -322,10 +322,17 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
   - JSON
   - Chunked Requests
   - Debug Mode
+      - Support Curl Dump
   - SetTimeout
-  - [] Middleware
+  - [] Http Proxy
+  - [] Socks5 Proxy
   - [] Support traceInfo(like resty's clientTrace and gout)
-  - [] Support stream and notParseResponse
+  - [] Support http stream and callback(notParseResponse)
+  - [] Remove Global Setting
+  - [] Support http2
+  - [] Support retry
+  - [] Support connection pool
+  - [] Middleware support?
 
 # Thanks
 This project is inspired by [github.com/asmcos/requests](http://github.com/asmcos/requests). 
