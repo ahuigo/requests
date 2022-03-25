@@ -284,7 +284,7 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 
 	headerK := "User-Agent"
 	headerV := "Custom-Test-Go-User-Agent"
-	requests.SetHeader(headerK, headerV)
+	session := requests.R().SetGlobalHeader(headerK, headerV)
 
 # Utils
 

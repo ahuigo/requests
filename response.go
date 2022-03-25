@@ -27,7 +27,6 @@ import (
 type Response struct {
 	R         *http.Response
 	body      []byte
-	text      string
 	httpreq   *http.Request
 	client    *http.Client
 	isdebug   bool
@@ -66,7 +65,7 @@ func (resp *Response) ResponseDebug() {
 	}
 
 	fmt.Println(string(message))
-	fmt.Println("-----------ResponseDebug(end) ------------")
+	fmt.Println("========== ResponseDebug(end) ============")
 }
 
 func (resp *Response) Body() []byte {
@@ -95,8 +94,7 @@ func (resp *Response) Body() []byte {
 }
 
 func (resp *Response) Text() string {
-	resp.text = string(resp.body)
-	return resp.text
+	return string(resp.body)
 }
 
 func (resp *Response) Size() int {
@@ -153,8 +151,25 @@ func (resp *Response) Cookies() (cookies []*http.Cookie) {
 	if httpreq == nil || client == nil {
 		return cookies
 	}
+	// cookies's type is `[]*http.Cookies`
 	cookies = client.Jar.Cookies(httpreq.URL)
-
 	return cookies
+}
 
+func (resp *Response) GetCookie(key string) (val string) {
+	cookies := map[string]string{}
+	for _, c := range resp.Cookies() {
+		cookies[c.Name] = c.Value
+	}
+	val = cookies[key]
+	return val
+}
+
+func (resp *Response) HasCookie(key string) (exists bool) {
+	cookies := map[string]string{}
+	for _, c := range resp.Cookies() {
+		cookies[c.Name] = c.Value
+	}
+	_, exists = cookies[key]
+	return exists
 }

@@ -9,7 +9,7 @@ func (session *Session) RequestDebug() {
 	if !session.isdebug {
 		return
 	}
-	fmt.Println("===========Go RequestDebug !============")
+	fmt.Println("-----------Go RequestDebug !------------")
 	curl := BuildCurlRequest(session.httpreq, session.Client.Jar)
 	fmt.Println(curl)
 	message, err := httputil.DumpRequestOut(session.httpreq, false)

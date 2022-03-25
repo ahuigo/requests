@@ -88,7 +88,7 @@ func TestSessionCookieWithClone(t *testing.T) {
 		}
 		cookies[c.Name] = c.Value
 	}
-	if cookies["name1"] != "value1" || cookies["name2"] != "value2" {
+	if resp.GetCookie("name1") != "value1" || resp.GetCookie("name2") != "value2" {
 		t.Fatalf("Failed to send valid cookie(%+v)", resp.Cookies())
 	}
 

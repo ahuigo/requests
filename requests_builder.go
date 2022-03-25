@@ -13,38 +13,13 @@ import (
 	"strings"
 )
 
-// New request session
-func R() *Session {
-	return NewSession()
-}
-
-// New request session
-// @params method  GET|POST|PUT|DELETE|PATCH
-func NewSession() *Session {
-	session := new(Session)
-	session.reset()
-
-	session.Client = NewHttpClient()
-
-	return session
-}
-
-func NewHttpClient() *http.Client {
-	// cookiejar.New source code return jar, nil
-	jar, _ := cookiejar.New(nil)
-	client := &http.Client{
-		Jar: jar,
-	}
-	return client
-}
-
 type Session struct {
 	httpreq     *http.Request
 	Client      *http.Client
 	isdebug     bool
 	respHandler func(*Response) error
-	// global header
-	Header      *http.Header
+	// session header
+	gHeader     map[string]string
 	initCookies []*http.Cookie
 }
 
@@ -69,6 +44,36 @@ const (
 // Auth - {username,password}
 type Auth []string
 type Method string
+
+// New request session
+func R() *Session {
+	return NewSession()
+}
+
+// New request session
+// @params method  GET|POST|PUT|DELETE|PATCH
+func NewSession() *Session {
+	var gHeader = map[string]string{
+		"User-Agent": "Go-requests-" + getVersion(),
+	}
+	session := &Session{
+		gHeader: gHeader,
+	}
+	session.reset()
+
+	session.Client = NewHttpClient()
+
+	return session
+}
+
+func NewHttpClient() *http.Client {
+	// cookiejar.New source code return jar, nil
+	jar, _ := cookiejar.New(nil)
+	client := &http.Client{
+		Jar: jar,
+	}
+	return client
+}
 
 // BuildRequest
 func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http.Request, error) {
@@ -141,6 +146,12 @@ func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http
 			session.setBodyFormEncode(formEncodeValues)
 		}
 	}
+
+	// set header
+	for key, value := range session.gHeader {
+		session.httpreq.Header.Set(key, value)
+	}
+
 	//prepare to Do
 	URL, err := url.Parse(disturl)
 	if err != nil {
@@ -162,10 +173,7 @@ func (session *Session) reset() {
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 	}
-	session.Header = &session.httpreq.Header
-	for key, value := range gHeader {
-		session.httpreq.Header.Set(key, value)
-	}
+
 }
 
 func (session *Session) Clone() *Session {
@@ -232,7 +240,7 @@ func (session *Session) buildFilesAndForms(files []map[string]string, datas []ma
 	// "Content-Type": "multipart/form-data; boundary=------------------------7d87eceb5520850c",
 	session.httpreq.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
 	session.httpreq.ContentLength = int64(b.Len())
-	session.Header.Set("Content-Type", w.FormDataContentType())
+	session.httpreq.Header.Set("Content-Type", w.FormDataContentType())
 }
 
 // build post Form encode

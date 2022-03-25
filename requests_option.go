@@ -9,19 +9,6 @@ import (
 	"time"
 )
 
-var gHeader = map[string]string{
-	"User-Agent": "Go-requests-" + getVersion(),
-}
-
-// Set global header
-func SetHeader(key, value string) {
-	if value == "" {
-		delete(gHeader, key)
-		return
-	}
-	gHeader[key] = value
-}
-
 // set timeout s = second
 func (session *Session) SetTimeout(n time.Duration) *Session {
 	session.Client.Timeout = n
@@ -58,6 +45,23 @@ func (session *Session) SetMethod(method string) *Session {
 
 // SetHeader
 func (session *Session) SetHeader(key, value string) *Session {
-	session.Header.Set(key, value)
+	session.httpreq.Header.Set(key, value)
+	return session
+}
+
+// Set global header
+func (session *Session) SetGlobalHeader(key, value string) *Session {
+	session.gHeader[key] = value
+	return session
+}
+
+// Get global header
+func (session *Session) GetGlobalHeader() map[string]string {
+	return session.gHeader
+}
+
+// Del global header
+func (session *Session) DelGlobalHeader(key string) *Session {
+	delete(session.gHeader, key)
 	return session
 }
