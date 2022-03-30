@@ -16,6 +16,8 @@ func createHttpbinServer() (ts *httptest.Server) {
 		switch path := r.URL.Path; {
 		case path == "/get":
 			getHandler(w, r)
+		case path == "/post":
+			postHandler(w, r)
 		case strings.HasPrefix(path, "/cookie/"):
 			cookieHandler(w, r)
 		default:
@@ -24,6 +26,18 @@ func createHttpbinServer() (ts *httptest.Server) {
 	})
 
 	return ts
+}
+
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	body, _ := ioutil.ReadAll(r.Body)
+	m := map[string]interface{}{
+		"headers": dumpRequestHeader(r),
+		"args":    parseRequestArgs(r),
+		"body":    string(body),
+	}
+	buf, _ := json.Marshal(m)
+	_, _ = w.Write(buf)
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {

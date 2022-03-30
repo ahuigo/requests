@@ -25,13 +25,14 @@ import (
 )
 
 type Response struct {
-	R         *http.Response
-	body      []byte
-	httpreq   *http.Request
-	client    *http.Client
-	isdebug   bool
-	startTime time.Time
-	endTime   time.Time
+	R           *http.Response
+	body        []byte
+	httpreq     *http.Request
+	client      *http.Client
+	isdebug     bool
+	isdebugBody bool
+	startTime   time.Time
+	endTime     time.Time
 }
 
 func BuildResponse(response *http.Response) *Response {
@@ -59,7 +60,7 @@ func (resp *Response) ResponseDebug() {
 	}
 	fmt.Println("===========ResponseDebug ============")
 
-	message, err := httputil.DumpResponse(resp.R, false)
+	message, err := httputil.DumpResponse(resp.R, resp.isdebugBody)
 	if err != nil {
 		return
 	}

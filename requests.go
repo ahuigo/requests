@@ -35,15 +35,16 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 	}
 
 	resp = &Response{
-		R:         res,
-		startTime: startTime,
-		endTime:   time.Now(),
-		httpreq:   session.httpreq,
-		client:    session.Client,
-		isdebug:   session.isdebug,
+		R:           res,
+		startTime:   startTime,
+		endTime:     time.Now(),
+		httpreq:     session.httpreq,
+		client:      session.Client,
+		isdebug:     session.isdebug,
+		isdebugBody: session.isdebugBody,
 	}
-	resp.SetStartEndTime(startTime, time.Now()).Body()
 	resp.ResponseDebug()
+	resp.SetStartEndTime(startTime, time.Now()).Body()
 	session.reset()
 
 	// global respnse hander & session response handler

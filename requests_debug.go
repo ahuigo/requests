@@ -24,7 +24,13 @@ func (session *Session) SetDebug() *Session {
 	session.isdebug = true
 	return session
 }
+func (session *Session) SetDebugBody() *Session {
+	session.isdebug = true
+	session.isdebugBody = true
+	return session
+}
 func (session *Session) DisableDebug() *Session {
 	session.isdebug = false
+	session.isdebugBody = false
 	return session
 }

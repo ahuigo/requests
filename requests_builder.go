@@ -17,6 +17,7 @@ type Session struct {
 	httpreq     *http.Request
 	Client      *http.Client
 	isdebug     bool
+	isdebugBody bool
 	respHandler func(*Response) error
 	// session header
 	gHeader     map[string]string
