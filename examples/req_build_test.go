@@ -22,6 +22,17 @@ func TestBuildRequest(t *testing.T) {
 		t.Fatal("Failed to build request")
 	}
 }
+func TestBuildCurlRequest(t *testing.T) {
+	req, _ := requests.BuildRequest("post", "https://baidu.com/path?q=curl&v=1", requests.Json{
+		"age": 1,
+	})
+	curl := requests.BuildCurlRequest(req)
+	if !regexp.MustCompile(`^curl -X POST .+ 'https://baidu.com/path\?q=curl&v=1'`).MatchString(curl) {
+		t.Fatal(`bad curl cmd: ` + curl)
+	}
+	t.Log(curl)
+}
+
 func TestBuildRequestHost(t *testing.T) {
 	req, err := requests.BuildRequest("post", "http://baidu.com/a/b/c", requests.Json{
 		"age": 1,
@@ -37,15 +48,4 @@ func TestBuildRequestHost(t *testing.T) {
 	if req.Host != "ahuigo.com" {
 		t.Fatalf("bad host:%s\n", req.Host)
 	}
-}
-
-func TestBuildCurlRequest(t *testing.T) {
-	req, _ := requests.BuildRequest("post", "https://baidu.com/path?q=curl&v=1", requests.Json{
-		"age": 1,
-	})
-	curl := requests.BuildCurlRequest(req)
-	if !regexp.MustCompile(`^curl -X POST .+ 'https://baidu.com/path\?q=curl&v=1'`).MatchString(curl) {
-		t.Fatal(`bad curl cmd: ` + curl)
-	}
-	t.Log(curl)
 }
