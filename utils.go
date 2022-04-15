@@ -14,8 +14,7 @@ import (
 // BuildRequest -
 func BuildRequest(method string, origurl string, args ...interface{}) (req *http.Request, err error) {
 	// call request Get
-	args = append(args, Method(method))
-	req, err = R().BuildRequest(origurl, args...)
+	req, err = R().BuildRequest(method, origurl, args...)
 	return
 }
 

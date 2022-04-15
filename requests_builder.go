@@ -44,7 +44,6 @@ const (
 
 // Auth - {username,password}
 type Auth []string
-type Method string
 
 // New request session
 func R() *Session {
@@ -77,18 +76,17 @@ func NewHttpClient() *http.Client {
 }
 
 // BuildRequest
-func (session *Session) BuildRequest(origurl string, args ...interface{}) (*http.Request, error) {
+func (session *Session) BuildRequest(method, origurl string, args ...interface{}) (*http.Request, error) {
 	var params []map[string]string
 	var datas []map[string]string // form data
 	var files []map[string]string //file data
 	dataType := ContentTypeNone
 	bodyBytes := []byte{}
 
+	session.httpreq.Method = strings.ToUpper(method)
 	for _, arg := range args {
 		switch arg := arg.(type) {
 		// arg is Header , set to request header
-		case Method:
-			session.httpreq.Method = strings.ToUpper(string(arg))
 		case Header:
 			for k, v := range arg {
 				session.httpreq.Header.Set(k, v)
