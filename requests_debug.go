@@ -5,19 +5,20 @@ import (
 	"net/http/httputil"
 )
 
-func (session *Session) RequestDebug() {
+func (session *Session) RequestDebug() string {
 	if !session.isdebug {
-		return
+		return ""
 	}
 	fmt.Println("-----------Go RequestDebug !------------")
 	curl := BuildCurlRequest(session.httpreq, session.Client.Jar)
 	fmt.Println(curl)
 	message, err := httputil.DumpRequestOut(session.httpreq, false)
 	if err != nil {
-		return
+		return ""
 	}
 	fmt.Println(string(message))
 	fmt.Println("-----Go RequestDebug(end)!------------")
+	return curl
 }
 
 func (session *Session) SetDebug() *Session {

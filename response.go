@@ -25,14 +25,16 @@ import (
 )
 
 type Response struct {
-	R           *http.Response
-	body        []byte
-	httpreq     *http.Request
-	client      *http.Client
-	isdebug     bool
-	isdebugBody bool
-	startTime   time.Time
-	endTime     time.Time
+	R            *http.Response
+	body         []byte
+	httpreq      *http.Request
+	client       *http.Client
+	isdebug      bool
+	isdebugBody  bool
+	startTime    time.Time
+	endTime      time.Time
+	dumpCurl     string
+	dumpResponse string
 }
 
 func BuildResponse(response *http.Response) *Response {
@@ -42,6 +44,11 @@ func BuildResponse(response *http.Response) *Response {
 	r.Body()
 	return r
 }
+
+func (resp *Response) GetReq() (req *http.Request) {
+	return resp.httpreq
+}
+
 func (resp *Response) SetClientReq(req *http.Request, client *http.Client) *Response {
 	resp.client = client
 	resp.httpreq = req
@@ -67,6 +74,19 @@ func (resp *Response) ResponseDebug() {
 
 	fmt.Println(string(message))
 	fmt.Println("========== ResponseDebug(end) ============")
+}
+
+func (resp *Response) DumpResponse(isdebugBody bool) error {
+	message, err := httputil.DumpResponse(resp.R, isdebugBody)
+	resp.dumpResponse = string(message)
+	return err
+}
+
+func (resp *Response) GetDumpCurl() string {
+	return resp.dumpCurl
+}
+func (resp *Response) GetDumpResponse() string {
+	return resp.dumpCurl
 }
 
 func (resp *Response) Body() []byte {
