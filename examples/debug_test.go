@@ -43,7 +43,7 @@ func TestDebugRequestAndResponse(t *testing.T) {
 	ts := createHttpbinServer()
 	defer ts.Close()
 
-	session := requests.R().SetDebug()
+	session := requests.R().SetDebugBody()
 	resp, err := session.Post(ts.URL+"/post",
 		requests.Json{
 			"name": "ahuigo",
@@ -58,12 +58,12 @@ func TestDebugRequestAndResponse(t *testing.T) {
 	}
 	//debug curl requests
 	curl := resp.GetDumpCurl()
-	if !strings.Contains(curl, "Cookie: count=1") {
+	if !strings.Contains(curl, "Cookie: count=1") || !strings.Contains(curl, "curl -X POST") {
 		t.Fatal("bad curl:", curl)
 	}
 	//debug response
 	dumpResponse := resp.GetDumpResponse()
-	if !strings.Contains(curl, `'{"name":"ahuigo"}'`) {
+	if !strings.Contains(dumpResponse, `"body":"{\"name\":\"ahuigo\"}"`) || !strings.Contains(dumpResponse, "Content-Type: application/json") {
 		t.Fatal("bad dump response:", dumpResponse)
 	}
 }

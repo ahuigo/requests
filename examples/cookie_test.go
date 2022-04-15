@@ -1,7 +1,9 @@
 package examples
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -92,4 +94,49 @@ func TestSessionCookieWithClone(t *testing.T) {
 		t.Fatalf("Failed to send valid cookie(%+v)", resp.Cookies())
 	}
 
+}
+
+// Test Set-Cookie
+func TestResponseCookie(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	// resp, err := requests.Get("https://httpbin.org/json")
+	resp, err := requests.Get(ts.URL + "/cookie/count")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cs := resp.Cookies()
+	if len(cs) == 0 {
+		t.Fatalf("require cookies, body=%s", resp.Body())
+	}
+}
+
+func TestResponseBuildCookie(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	// resp, err := requests.Get("https://httpbin.org/json")
+	resp, err := requests.Get(ts.URL + "/cookie/count")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// build new resposne
+	resp.R.Body = ioutil.NopCloser(bytes.NewBuffer(resp.Body())) // important!!
+	resp = requests.BuildResponse(resp.R)
+	cs := resp.Cookies()
+	if len(cs) == 0 {
+		t.Fatalf("require cookies, headers=%#v, body=%s", resp.Header(), resp.Body())
+	}
+	findCount := false
+	for _, c := range cs {
+		if c.Name == "count" && c.Value == "1" {
+			findCount = true
+		}
+	}
+	if !findCount {
+		t.Fatalf("could not find cookie, dumpResponse=%s", resp.GetDumpResponse())
+	}
 }

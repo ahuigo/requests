@@ -13,6 +13,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 package requests
 
 import (
+	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"errors"
@@ -41,6 +42,8 @@ func BuildResponse(response *http.Response) *Response {
 	r := &Response{
 		R: response,
 	}
+	// resp.R.Body = ioutil.NopCloser(bytes.NewBuffer(resp.Body())) // important!!
+	r._DumpResponse(true)
 	r.Body()
 	return r
 }
@@ -66,17 +69,16 @@ func (resp *Response) ResponseDebug() {
 		return
 	}
 	fmt.Println("===========ResponseDebug ============")
-
-	message, err := httputil.DumpResponse(resp.R, resp.isdebugBody)
+	err := resp._DumpResponse(resp.isdebugBody)
 	if err != nil {
 		return
 	}
-
-	fmt.Println(string(message))
+	fmt.Println(resp.dumpResponse)
 	fmt.Println("========== ResponseDebug(end) ============")
 }
 
-func (resp *Response) DumpResponse(isdebugBody bool) error {
+func (resp *Response) _DumpResponse(isdebugBody bool) error {
+	//resp.isdebug
 	message, err := httputil.DumpResponse(resp.R, isdebugBody)
 	resp.dumpResponse = string(message)
 	return err
@@ -86,7 +88,13 @@ func (resp *Response) GetDumpCurl() string {
 	return resp.dumpCurl
 }
 func (resp *Response) GetDumpResponse() string {
-	return resp.dumpCurl
+	if resp.dumpResponse == "" {
+		if resp.R.Body == nil {
+			resp.R.Body = ioutil.NopCloser(bytes.NewBuffer(resp.Body())) // important!!
+		}
+		resp._DumpResponse(true)
+	}
+	return resp.dumpResponse
 }
 
 func (resp *Response) Body() []byte {
@@ -170,7 +178,7 @@ func (resp *Response) Cookies() (cookies []*http.Cookie) {
 	client := resp.client
 
 	if httpreq == nil || client == nil {
-		return cookies
+		return resp.R.Cookies()
 	}
 	// cookies's type is `[]*http.Cookies`
 	cookies = client.Jar.Cookies(httpreq.URL)

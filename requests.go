@@ -26,7 +26,7 @@ func SetRespHandler(fn func(*Response) error) {
 // Post -
 func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
 	session.BuildRequest(origurl, args...)
-	debugCurl := session.RequestDebug()
+	dumpCurl := session.RequestDebug()
 	startTime := time.Now()
 	res, err := session.Client.Do(session.httpreq)
 
@@ -42,7 +42,7 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 		client:      session.Client,
 		isdebug:     session.isdebug,
 		isdebugBody: session.isdebugBody,
-		dumpCurl:    debugCurl,
+		dumpCurl:    dumpCurl,
 	}
 	resp.ResponseDebug()
 	resp.SetStartEndTime(startTime, time.Now()).Body()
