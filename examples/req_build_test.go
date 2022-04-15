@@ -22,6 +22,22 @@ func TestBuildRequest(t *testing.T) {
 		t.Fatal("Failed to build request")
 	}
 }
+func TestBuildRequestHost(t *testing.T) {
+	req, err := requests.BuildRequest("post", "http://baidu.com/a/b/c", requests.Json{
+		"age": 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if req.Host != "baidu.com" {
+		t.Fatalf("bad host:%s\n", req.Host)
+	}
+
+	req, _ = requests.BuildRequest("post", "http://baidu.com/a/b/c", requests.Header{"Host": "ahuigo.com"})
+	if req.Host != "ahuigo.com" {
+		t.Fatalf("bad host:%s\n", req.Host)
+	}
+}
 
 func TestBuildCurlRequest(t *testing.T) {
 	req, _ := requests.BuildRequest("post", "https://baidu.com/path?q=curl&v=1", requests.Json{

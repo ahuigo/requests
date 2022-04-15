@@ -158,6 +158,14 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	}
 	session.httpreq.URL = URL
 
+	// set host
+	host := session.httpreq.Header.Get("Host")
+	if host != "" {
+		session.httpreq.Host = host
+	} else {
+		session.httpreq.Host = session.httpreq.URL.Host
+	}
+
 	session.clientLoadCookies()
 	// fmt.Printf("session:%#v\n", session.httpreq)
 	// fmt.Printf("session-url:%#v\n", session.httpreq.URL.String())
