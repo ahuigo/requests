@@ -3,12 +3,15 @@ package examples
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func createHttpbinServer() (ts *httptest.Server) {
@@ -18,6 +21,8 @@ func createHttpbinServer() (ts *httptest.Server) {
 			getHandler(w, r)
 		case path == "/post":
 			postHandler(w, r)
+		case path == "/sleep":
+			sleepHandler(w, r)
 		case strings.HasPrefix(path, "/cookie/"):
 			cookieHandler(w, r)
 		default:
@@ -38,6 +43,19 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	buf, _ := json.Marshal(m)
 	_, _ = w.Write(buf)
+}
+
+func sleepHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	regx := regexp.MustCompile(`^/sleep/(\d+)`)
+	res := regx.FindStringSubmatch(r.URL.Path) // res may be: []string(nil)
+	seconds := 0
+	if res != nil {
+		seconds, _ = strconv.Atoi(res[1])
+	}
+	time.Sleep(time.Duration(seconds) * time.Second)
+	out := fmt.Sprintf("sleep %ds", seconds)
+	_, _ = w.Write([]byte(out))
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request) {

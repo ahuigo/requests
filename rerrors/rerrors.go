@@ -9,8 +9,9 @@ import (
 type ErrorType string
 
 const (
-	NetworkError ErrorType = "error-network"
-	URLError     ErrorType = "error-url"
+	NetworkError   ErrorType = "network-error"
+	NetworkTimeout ErrorType = "network-timeout"
+	URLError       ErrorType = "error-url"
 )
 
 type Error struct {

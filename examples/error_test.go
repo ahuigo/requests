@@ -14,12 +14,31 @@ func TestError(t *testing.T) {
 		t.Fatalf("unexpected error:%+v", err)
 	} else {
 		switch err2.ErrType {
+		case rerrors.NetworkTimeout:
+			t.Log(err2.ErrType)
 		case rerrors.NetworkError:
 			t.Log(err2.ErrType)
 		case rerrors.URLError:
 			t.Log(err2.ErrType)
 		default:
 			t.Log(err2.ErrType)
+		}
+	}
+}
+func TestErrorTimeout(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	// resp, err := requests.Get("https://httpbin.org/json")
+	_, err := requests.R().SetTimeout(1).Get(ts.URL + "/sleep/10")
+	if err2, ok := err.(*rerrors.Error); !ok {
+		t.Fatalf("unexpected error:%+v", err)
+	} else {
+		switch err2.ErrType {
+		case rerrors.NetworkTimeout:
+			t.Log(err2.ErrType)
+		default:
+			t.Fatalf("unexpected error type:%+v", err2.ErrType)
 		}
 	}
 }

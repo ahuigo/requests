@@ -13,6 +13,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 package requests
 
 import (
+	"strings"
 	"time"
 
 	"github.com/ahuigo/requests/rerrors"
@@ -34,7 +35,11 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 	res, err := session.Client.Do(session.httpreq)
 
 	if err != nil {
-		err := rerrors.Wrapf(rerrors.NetworkError, err, "%s %s", session.httpreq.Method, origurl)
+		if strings.Contains(err.Error(), "Timeout exceeded while awaiting headers") {
+			err = rerrors.Wrapf(rerrors.NetworkTimeout, err, "%s %s", session.httpreq.Method, origurl)
+		} else {
+			err = rerrors.Wrapf(rerrors.NetworkError, err, "%s %s", session.httpreq.Method, origurl)
+		}
 		return nil, err
 	}
 
