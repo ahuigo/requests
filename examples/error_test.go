@@ -24,6 +24,7 @@ func TestError(t *testing.T) {
 			t.Log(err2.ErrType)
 		}
 	}
+	t.Log(err)
 }
 func TestErrorTimeout(t *testing.T) {
 	ts := createHttpbinServer()

@@ -26,7 +26,7 @@ func TestPostParams(t *testing.T) {
 	}{}
 	_ = resp.Json(&data)
 	if data.Args.Name != "ahuigo" {
-		t.Error("invalid response body:", resp.Text())
+		t.Fatal("invalid response body:", resp.Text())
 	}
 }
 
