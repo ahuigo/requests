@@ -34,11 +34,11 @@ func openFile(filename string) *os.File {
 }
 
 // handle URL params
-func buildURLParams(userURL string, params ...map[string]string) (string, error) {
+func buildURLParams(userURL string, params ...map[string]string) (*url.URL, error) {
 	parsedURL, err := url.Parse(userURL)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	values := parsedURL.Query()
@@ -49,5 +49,5 @@ func buildURLParams(userURL string, params ...map[string]string) (string, error)
 		}
 	}
 	parsedURL.RawQuery = values.Encode()
-	return parsedURL.String(), nil
+	return parsedURL, nil
 }

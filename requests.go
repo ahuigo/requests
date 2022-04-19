@@ -13,8 +13,9 @@ Licensed under the Apache License, Version 2.0 (the "License");
 package requests
 
 import (
-	"errors"
 	"time"
+
+	"github.com/ahuigo/requests/rerrors"
 )
 
 var respHandler func(*Response) error
@@ -25,13 +26,16 @@ func SetRespHandler(fn func(*Response) error) {
 
 // Post -
 func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
-	session.BuildRequest(session.httpreq.Method, origurl, args...)
+	if _, err = session.BuildRequest(session.httpreq.Method, origurl, args...); err != nil {
+		return nil, err
+	}
 	dumpCurl := session.RequestDebug()
 	startTime := time.Now()
 	res, err := session.Client.Do(session.httpreq)
 
 	if err != nil {
-		return nil, errors.New(session.httpreq.Method + " " + origurl + " " + err.Error())
+		err := rerrors.Wrapf(rerrors.NetworkError, err, "%s %s", session.httpreq.Method, origurl)
+		return nil, err
 	}
 
 	resp = &Response{

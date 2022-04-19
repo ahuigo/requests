@@ -11,6 +11,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+
+	"github.com/ahuigo/requests/rerrors"
 )
 
 type Session struct {
@@ -123,7 +125,15 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		}
 	}
 
-	disturl, _ := buildURLParams(origurl, params...)
+	URL, err := buildURLParams(origurl, params...)
+	if err != nil {
+		err = rerrors.Wrapf(rerrors.URLError, err, "bad url:%s", origurl)
+		return nil, err
+	}
+	if URL.Scheme == "" || URL.Host == "" {
+		err = rerrors.Errorf(rerrors.URLError, "bad url:%s", origurl)
+		return nil, err
+	}
 
 	switch dataType {
 	case ContentTypeFormEncode:
@@ -151,11 +161,6 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		session.httpreq.Header.Set(key, value)
 	}
 
-	//prepare to Do
-	URL, err := url.Parse(disturl)
-	if err != nil {
-		return nil, err
-	}
 	session.httpreq.URL = URL
 
 	// set host
