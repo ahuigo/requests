@@ -23,7 +23,7 @@ func createHttpbinServer() (ts *httptest.Server) {
 			postHandler(w, r)
 		case path == "/sleep":
 			sleepHandler(w, r)
-		case strings.HasPrefix(path, "/cookie/"):
+		case path == "/cookie/count":
 			cookieHandler(w, r)
 		default:
 			_, _ = w.Write([]byte("404 " + path))
@@ -139,7 +139,8 @@ func parseRequestArgs(request *http.Request) map[string]string {
 	params := map[string]string{}
 	paramsList, _ := url.ParseQuery(query)
 	for key, vals := range paramsList {
-		params[key] = vals[len(vals)-1]
+		// params[key] = vals[len(vals)-1]
+		params[key] = strings.Join(vals, ",")
 	}
 	return params
 }

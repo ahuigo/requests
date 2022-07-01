@@ -11,9 +11,11 @@ import (
 )
 
 func TestSendCookie(t *testing.T) {
-	resp, err := requests.Get("https://www.httpbin.org/cookies",
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	resp, err := requests.Get(ts.URL+"/cookie/count",
 		requests.Header{"Cookie": "id_token=1234"},
-		requests.Json{"workflow_id": "wfid1234"},
 	)
 	if err != nil {
 		panic(err)

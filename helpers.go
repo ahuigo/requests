@@ -34,7 +34,7 @@ func openFile(filename string) *os.File {
 }
 
 // handle URL params
-func buildURLParams(userURL string, params ...map[string]string) (*url.URL, error) {
+func buildURLParams(userURL string, params map[string]string, paramsArray map[string][]string) (*url.URL, error) {
 	parsedURL, err := url.Parse(userURL)
 
 	if err != nil {
@@ -43,9 +43,12 @@ func buildURLParams(userURL string, params ...map[string]string) (*url.URL, erro
 
 	values := parsedURL.Query()
 
-	for _, param := range params {
-		for key, value := range param {
-			values.Set(key, value)
+	for key, value := range params {
+		values.Set(key, value)
+	}
+	for key, vals := range paramsArray {
+		for _, v := range vals {
+			values.Add(key, v)
 		}
 	}
 	parsedURL.RawQuery = values.Encode()

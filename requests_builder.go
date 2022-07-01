@@ -28,6 +28,7 @@ type Session struct {
 
 type Header map[string]string
 type Params map[string]string
+type ParamsArray map[string][]string
 type Datas map[string]string     // for post form urlencode
 type FormData map[string]string  // for post multipart/form-data
 type Json map[string]interface{} // for Json map
@@ -79,7 +80,8 @@ func NewHttpClient() *http.Client {
 
 // BuildRequest
 func (session *Session) BuildRequest(method, origurl string, args ...interface{}) (*http.Request, error) {
-	var params []map[string]string
+	var params map[string]string
+	var paramsArray map[string][]string
 	var datas []map[string]string // form data
 	var files []map[string]string //file data
 	dataType := ContentTypeNone
@@ -101,7 +103,9 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 			session.setContentType(string(arg))
 			dataType = arg
 		case Params:
-			params = append(params, arg)
+			params = arg
+		case ParamsArray:
+			paramsArray = arg
 		case Datas:
 			datas = append(datas, arg)
 		case FormData:
@@ -125,7 +129,7 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		}
 	}
 
-	URL, err := buildURLParams(origurl, params...)
+	URL, err := buildURLParams(origurl, params, paramsArray)
 	if err != nil {
 		err = rerrors.Wrapf(rerrors.URLError, err, "bad url:%s", origurl)
 		return nil, err

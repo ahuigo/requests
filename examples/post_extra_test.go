@@ -9,24 +9,27 @@ import (
 
 // Post Json: application/json
 func TestPostJsonInterface(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
 	anyTypeData := map[string]interface{}{
 		"name": "Alex",
 	}
 	json := requests.Jsoni(anyTypeData)
-	resp, err := requests.Post("https://www.httpbin.org/post", json)
+	resp, err := requests.Post(ts.URL+"/post", json)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// parse data
 	var data = struct {
-		Data string
+		Body string
 	}{}
 	resp.Json(&data)
 
 	// is expected results
 	jsonData, _ := ejson.Marshal(json) // if data.Data!= "{\"name\":\"Alex\"}"{
-	if data.Data != string(jsonData) {
-		t.Error("invalid response body:", resp.Text())
+	if data.Body != string(jsonData) {
+		t.Fatalf("expected: %s,\ninvalid body:%s", string(jsonData), resp.Text())
 	}
 }

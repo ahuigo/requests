@@ -2,6 +2,7 @@ package examples
 
 import (
 	ejson "encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/ahuigo/requests"
@@ -32,45 +33,46 @@ func TestPostParams(t *testing.T) {
 
 // Post Form UrlEncoded data: application/x-www-form-urlencoded
 func TestPostFormUrlEncode(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
 	resp, err := requests.Post(
-		"https://www.httpbin.org/post",
+		ts.URL+"/post",
 		requests.Datas{
 			"name": "ahuigo",
 		},
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var data = struct {
-		Form struct {
-			Name string
-		}
+		Body string
 	}{}
 	resp.Json(&data)
-	if data.Form.Name != "ahuigo" {
-		t.Error("invalid response body:", resp.Text())
+	if data.Body != "name=ahuigo" {
+		t.Fatal("invalid response body:", resp.Text())
 	}
 }
 
 // Test POST:  multipart/form-data; boundary=....
 func TestPostFormData(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
 	resp, err := requests.Post(
-		"https://www.httpbin.org/post",
+		ts.URL+"/post",
 		requests.FormData{
 			"name": "ahuigo",
 		},
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var data = struct {
-		Form struct {
-			Name string
-		}
+		Body string
 	}{}
 	resp.Json(&data)
-	if data.Form.Name != "ahuigo" {
+	if !strings.Contains(data.Body, "form-data; name=\"name\"\r\n\r\nahuigo\r\n") {
 		t.Error("invalid response body:", resp.Text())
+		t.Error("invalid response body:", data.Body)
 	}
 }
 
@@ -83,7 +85,7 @@ func TestPostJson(t *testing.T) {
 	}
 	resp, err := requests.Post("https://www.httpbin.org/post", json)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// parse data
@@ -101,26 +103,32 @@ func TestPostJson(t *testing.T) {
 
 // Post Raw Bypes: text/plain
 func TestRawBytes(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
 	println("Test POST: post bytes data")
 	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post("https://www.httpbin.org/post", []byte(rawText))
+	resp, err := requests.Post(ts.URL+"/post", []byte(rawText))
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	var data = struct {
-		Data string
+		Body string
 	}{}
 	resp.Json(&data)
-	if data.Data != rawText {
+	if data.Body != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
 // Post Raw String: text/plain
 func TestRawString1(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
 	println("Test POST: raw post data ")
 	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post("https://www.httpbin.org/post", rawText,
+	resp, err := requests.Post(ts.URL+"/post", rawText,
 		requests.Header{"Content-Type": "text/plain"},
 	)
 	if err != nil {
@@ -128,14 +136,17 @@ func TestRawString1(t *testing.T) {
 	}
 	var data interface{}
 	resp.Json(&data)
-	if data.(map[string]interface{})["data"].(string) != rawText {
+	if data.(map[string]interface{})["body"].(string) != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 func TestRawString2(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
 	println("Test POST: raw post data ")
 	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post("https://www.httpbin.org/post", rawText,
+	resp, err := requests.Post(ts.URL+"/post", rawText,
 		requests.ContentTypePlain,
 	)
 	if err != nil {
@@ -143,15 +154,18 @@ func TestRawString2(t *testing.T) {
 	}
 	var data interface{}
 	resp.Json(&data)
-	if data.(map[string]interface{})["data"].(string) != rawText {
+	if data.(map[string]interface{})["body"].(string) != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
 func TestRawString3(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
 	println("Test POST: raw post data ")
 	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post("https://www.httpbin.org/post",
+	resp, err := requests.Post(ts.URL+"/post",
 		requests.ContentTypePlain,
 		rawText,
 	)
@@ -160,25 +174,25 @@ func TestRawString3(t *testing.T) {
 	}
 	var data interface{}
 	resp.Json(&data)
-	if data.(map[string]interface{})["data"].(string) != rawText {
+	if data.(map[string]interface{})["body"].(string) != rawText {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
 
 // TestPostEncodedString: application/x-www-form-urlencoded
 func TestPostEncodedString(t *testing.T) {
-	resp, err := requests.Post("https://www.httpbin.org/post", "name=Alex&age=29")
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	resp, err := requests.Post(ts.URL+"/post", "name=Alex&age=29")
 	if err != nil {
 		t.Fatal(err)
 	}
 	var data = struct {
-		Form struct {
-			Name string
-			Age  string
-		}
+		Body string
 	}{}
 	resp.Json(&data)
-	if data.Form.Age != "29" {
+	if data.Body != "name=Alex\u0026age=29" {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
