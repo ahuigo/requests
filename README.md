@@ -129,7 +129,7 @@ go get -u github.com/ahuigo/requests
 ### PostFiles
 
 	path, _ := os.Getwd()
-	session := requests.NewSession()
+	session := requests.R()
 
 	resp, err := session.SetDebug().Post(
 		"https://www.httpbin.org/post",
@@ -144,7 +144,7 @@ go get -u github.com/ahuigo/requests
 
 ## Session Support
     // 0. Make a session
-	session := r.NewSession()
+	session := r.R()
 
     // 1. First, set cookies: count=100
 	var data struct {
@@ -166,7 +166,7 @@ go get -u github.com/ahuigo/requests
 Warning: Session is not safe in multi goroutines. You can not do as following:
 
     // Bad! Do not call session in in multi goroutine!!!!!
-    session := requests.NewSession()
+    session := requests.R()
 
     // goroutine 1
     go func(){
@@ -182,13 +182,13 @@ Warning: Session is not safe in multi goroutines. You can not do as following:
 
 ### SetTimeout
 
-    session := Requests.NewSession()
+    session := Requests.R()
     session.SetTimeout(20*time.Second)
 
 ### Debug Mode
 Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
 
-	session := requests.NewSession()
+	session := requests.R()
 
 	resp, err := session.SetDebug().Post(
 		"https://www.httpbin.org/post",
@@ -199,7 +199,7 @@ Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
 	)
 
 ### Set Authentication
-    session := requests.NewSession()
+    session := requests.R()
     resp,_ := session.Get("https://api.github.com/user",requests.Auth{"asmcos","password...."})
 
 ### Set Cookie
@@ -218,7 +218,7 @@ Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
     }
 
     func TestGetParamsHeaders2(t *testing.T) {
-        session := requests.NewSession()
+        session := requests.R()
         session.SetHeader("accept-encoding", "gzip, deflate, br")
         session.Run("http://www.zhanluejia.net.cn",
             requests.Params{"page": "1", "size": "20"},
@@ -325,7 +325,7 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 # Feature Support
   - Set headers, params, body, json, ....
   - Multipart File Uploads
-  - NewSession with Cookie Persistence
+  - R-seesion with Cookie Persistence
   - Proxy
       - Http Proxy
       - [] Socks5 Proxy

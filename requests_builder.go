@@ -49,13 +49,13 @@ const (
 type Auth []string
 
 // New request session
-func R() *Session {
-	return NewSession()
+func NewSession() *Session {
+	return R()
 }
 
 // New request session
 // @params method  GET|POST|PUT|DELETE|PATCH
-func NewSession() *Session {
+func R() *Session {
 	var gHeader = map[string]string{
 		"User-Agent": "Go-requests-" + getVersion(),
 	}
