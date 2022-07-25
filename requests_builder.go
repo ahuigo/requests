@@ -2,6 +2,7 @@ package requests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -78,6 +79,10 @@ func NewHttpClient() *http.Client {
 	return client
 }
 
+func (session *Session) setContext(ctx context.Context) {
+	session.httpreq = session.httpreq.WithContext(ctx)
+}
+
 // BuildRequest
 func (session *Session) BuildRequest(method, origurl string, args ...interface{}) (*http.Request, error) {
 	var params map[string]string
@@ -90,6 +95,8 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	session.httpreq.Method = strings.ToUpper(method)
 	for _, arg := range args {
 		switch arg := arg.(type) {
+		case context.Context:
+			session.setContext(arg)
 		// arg is Header , set to request header
 		case Header:
 			for k, v := range arg {

@@ -5,6 +5,7 @@
     t.MaxIdleConnsPerHost = 100
         
     httpClient = &http.Client{
+      // set requests timout
       Timeout:   10 * time.Second,
       Transport: t,
     }
