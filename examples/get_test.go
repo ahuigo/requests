@@ -75,3 +75,27 @@ func TestGetParamArray(t *testing.T) {
 		}
 	}
 }
+
+func TestGetWithHeader(t *testing.T) {
+	ts := createHttpbinServer()
+	defer ts.Close()
+
+	params := requests.Params{"name": "ahuigo"}
+	// var header requests.Header
+	header := requests.Header(nil)
+	resp, err := requests.Get(ts.URL+"/get", params, header)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err == nil {
+		type HbResponse struct {
+			Args map[string]string `json:"args"`
+		}
+		json := &HbResponse{}
+		if err := resp.Json(&json); err != nil {
+			t.Fatalf("bad json:%s", resp.Text())
+		}
+		t.Log(resp.Text())
+	}
+}
