@@ -322,9 +322,10 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 	}
 
 ## Retry request
+https://github.com/ahuigo/requests/blob/master/examples/retry_test.go
 
 	r := requests.R().
-		SetRetryCount(maxRetries).
+		SetRetryCount(3).
 		SetRetryCondition(func(resp *requests.Response, err error) bool {
 			if err != nil {
 				return true
