@@ -25,8 +25,37 @@ func SetRespHandler(fn func(*Response) error) {
 	respHandler = fn
 }
 
-// Post -
+// Run
 func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
+	if session.retryCount==0{
+		return session.execute(origurl, args...)
+	}
+
+	var retryConditions []RetryConditionFunc
+	if session.retryConditionFunc!=nil{
+		retryConditions = []RetryConditionFunc{session.retryConditionFunc}
+	}
+	attempt:=0
+	err = Backoff(
+		func() (*Response, error) {
+			resp, err = session.execute(origurl, args...)
+			if resp!=nil{
+				resp.Attempt = attempt
+			}
+			attempt++
+			return resp, err
+		},
+		Retries(session.retryCount),
+		WaitTime(session.retryWaitTime),
+		RetryConditions(retryConditions),
+	)
+	return resp, err
+}
+
+
+
+// RunRaw -
+func (session *Session) execute(origurl string, args ...interface{}) (resp *Response, err error) {
 	if _, err = session.BuildRequest(session.httpreq.Method, origurl, args...); err != nil {
 		return nil, err
 	}
@@ -54,7 +83,8 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 		dumpCurl:    dumpCurl,
 	}
 	resp.ResponseDebug()
-	resp.SetStartEndTime(startTime, time.Now()).Body()
+	resp.SetStartEndTime(startTime, time.Now())
+	resp.Body()
 	session.reset()
 
 	// global respnse hander & session response handler

@@ -321,6 +321,19 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
 		t.Fatal(`bad curl cmd: ` + curl)
 	}
 
+## Retry request
+
+	r := requests.R().
+		SetRetryCount(maxRetries).
+		SetRetryCondition(func(resp *requests.Response, err error) bool {
+			if err != nil {
+				return true
+			}
+			var json map[string]interface{}
+			resp.Json(&json)
+			return json["status"]!="ok"
+		})
+
 
 # Feature Support
   - Set headers, params, body, json, ....
@@ -335,6 +348,7 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
   - Debug Mode
       - Support Curl Dump
   - SetTimeout
+  - Retry
   - [] Support traceInfo(like resty's clientTrace and gout)
   - [] Support http stream and callback(notParseResponse)
   - [] Remove Global Setting

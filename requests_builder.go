@@ -12,9 +12,12 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/ahuigo/requests/rerrors"
 )
+
+
 
 type Session struct {
 	httpreq     *http.Request
@@ -25,6 +28,9 @@ type Session struct {
 	// session header
 	gHeader     map[string]string
 	initCookies []*http.Cookie
+	retryCount int
+	retryWaitTime time.Duration
+	retryConditionFunc func(*Response, error) bool
 }
 
 type Header map[string]string

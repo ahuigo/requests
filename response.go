@@ -27,6 +27,7 @@ import (
 
 type Response struct {
 	R            *http.Response
+	Attempt int
 	body         []byte
 	httpreq      *http.Request
 	client       *http.Client
