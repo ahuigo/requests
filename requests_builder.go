@@ -113,13 +113,13 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		case *http.Cookie:
 			session.SetCookie(arg)
 		case ContentType:
-			session.setContentType(string(arg))
 			dataType = arg
 		case Params:
 			params = arg
 		case ParamsArray:
 			paramsArray = arg
 		case Datas:
+			dataType = ContentTypeFormEncode
 			datas = append(datas, arg)
 		case FormData:
 			dataType = ContentTypeFormData
@@ -128,10 +128,14 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 			dataType = ContentTypeFormData
 			files = append(files, arg)
 		case string:
-			dataType = ContentTypeFormEncode
+			if dataType ==""{
+				dataType = ContentTypeFormEncode
+			}
 			bodyBytes = []byte(arg)
 		case []byte:
-			dataType = ContentTypePlain
+			if dataType ==""{
+				dataType = ContentTypePlain
+			}
 			bodyBytes = arg
 		case Json, Jsoni:
 			dataType = ContentTypeJson
@@ -155,7 +159,12 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	switch dataType {
 	case ContentTypeFormEncode:
 		session.setContentType("application/x-www-form-urlencoded")
-		session.setBodyBytes(bodyBytes)
+		if len(datas) > 0 {
+			formEncodeValues := session.buildFormEncode(datas...)
+			session.setBodyFormEncode(formEncodeValues)
+		}else{
+			session.setBodyBytes(bodyBytes)
+		}
 	case ContentTypeFormData:
 		// multipart/form-data
 		session.buildFilesAndForms(files, datas)
@@ -165,12 +174,6 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	case ContentTypePlain:
 		session.setContentType("text/plain")
 		session.setBodyBytes(bodyBytes)
-	default:
-		if len(datas) > 0 {
-			session.setContentType("application/x-www-form-urlencoded")
-			formEncodeValues := session.buildFormEncode(datas...)
-			session.setBodyFormEncode(formEncodeValues)
-		}
 	}
 
 	// set header
@@ -218,19 +221,20 @@ func (session *Session) Clone() *Session {
 }
 
 func (session *Session) setContentType(ct string) {
-	if session.httpreq.Header.Get("Content-Type") == "" && ct != "" {
+	// session.httpreq.Header.Get("Content-Type") == "" && 
+	if ct != "" {
 		session.httpreq.Header.Set("Content-Type", ct)
 	}
 }
 
-// only set forms
+// set form urlencode
 func (session *Session) setBodyFormEncode(Forms url.Values) {
 	data := Forms.Encode()
 	session.httpreq.Body = ioutil.NopCloser(strings.NewReader(data))
 	session.httpreq.ContentLength = int64(len(data))
 }
 
-// only set forms
+// set body
 func (session *Session) setBodyBytes(data []byte) {
 	session.httpreq.Body = ioutil.NopCloser(bytes.NewReader(data))
 	session.httpreq.ContentLength = int64(len(data))

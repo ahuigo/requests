@@ -32,6 +32,28 @@ func (session *Session) Proxy(proxyurl string) {
 	}
 }
 
+// SkipSsl
+func (session *Session) SkipSsl(v bool) *Session{
+	transport := session.Client.Transport
+	if transport == nil {
+		transport = &http.Transport{
+			TLSClientConfig: &tls.Config{},
+		}
+	}
+
+	switch tp := transport.(type){
+		case *http.Transport:
+			tlsConf := tp.TLSClientConfig
+			if tlsConf ==nil{
+				tlsConf = &tls.Config{}
+			}
+			tlsConf.InsecureSkipVerify= v
+
+	}
+	session.Client.Transport = transport
+	return session
+}
+
 func (session *Session) SetRespHandler(fn func(*Response) error) *Session {
 	session.respHandler = fn
 	return session
