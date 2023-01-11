@@ -35,6 +35,9 @@ func openFile(filename string) *os.File {
 
 // handle URL params
 func buildURLParams(userURL string, params map[string]string, paramsArray map[string][]string) (*url.URL, error) {
+	if strings.HasPrefix(userURL, "/") {
+		userURL = "http://localhost" + userURL
+	}
 	parsedURL, err := url.Parse(userURL)
 
 	if err != nil {
