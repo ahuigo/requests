@@ -6,9 +6,8 @@ import (
 	"github.com/ahuigo/requests"
 )
 
-
 func TestRetryCondition(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	// retry 3 times
@@ -21,7 +20,7 @@ func TestRetryCondition(t *testing.T) {
 			}
 			var json map[string]interface{}
 			resp.Json(&json)
-			return json["headers"]!="a"
+			return json["headers"] != "a"
 		})
 
 	resp, err := r.Get(ts.URL + "/get")
@@ -39,7 +38,7 @@ func TestRetryCondition(t *testing.T) {
 }
 
 func TestRetryCondition2(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	// retry 3 times
@@ -54,7 +53,7 @@ func TestRetryCondition2(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if resp.Attempt != 0{
+	if resp.Attempt != 0 {
 		t.Fatalf("Attemp %d not equal to %d", resp.Attempt, 0)
 	}
 

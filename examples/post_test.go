@@ -33,7 +33,7 @@ func TestPostParams(t *testing.T) {
 
 // Post Form UrlEncoded data: application/x-www-form-urlencoded
 func TestPostFormUrlEncode(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 	resp, err := requests.Post(
 		ts.URL+"/post",
@@ -55,7 +55,7 @@ func TestPostFormUrlEncode(t *testing.T) {
 
 // Test POST:  multipart/form-data; boundary=....
 func TestPostFormData(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 	resp, err := requests.Post(
 		ts.URL+"/post",
@@ -103,7 +103,7 @@ func TestPostJson(t *testing.T) {
 
 // Post Raw Bypes: text/plain
 func TestRawBytes(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	println("Test POST: post bytes data")
@@ -123,7 +123,7 @@ func TestRawBytes(t *testing.T) {
 
 // Post Raw String: text/plain
 func TestRawString1(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	println("Test POST: raw post data ")
@@ -141,7 +141,7 @@ func TestRawString1(t *testing.T) {
 	}
 }
 func TestRawString2(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	println("Test POST: raw post data ")
@@ -160,7 +160,7 @@ func TestRawString2(t *testing.T) {
 }
 
 func TestRawString3(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	println("Test POST: raw post data ")
@@ -181,7 +181,7 @@ func TestRawString3(t *testing.T) {
 
 // TestPostEncodedString: application/x-www-form-urlencoded
 func TestPostEncodedString(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	resp, err := requests.Post(ts.URL+"/post", "name=Alex&age=29")

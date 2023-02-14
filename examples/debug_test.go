@@ -9,7 +9,7 @@ import (
 )
 
 func TestGetDebug(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	// requests.R().SetDebug()		debug requests and response(no body)
@@ -40,7 +40,7 @@ func TestGetDebug(t *testing.T) {
 }
 
 func TestDebugRequestAndResponse(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	session := requests.R().SetDebugBody()

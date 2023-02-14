@@ -2,6 +2,7 @@ package examples
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,7 +17,7 @@ import (
 
 const maxMultipartMemory = 4 << 30 // 4MB
 
-func createHttpbinServer() (ts *httptest.Server) {
+func createHttpbinServer(isTls bool) (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		switch path := r.URL.Path; {
 		case path == "/get":
@@ -32,7 +33,7 @@ func createHttpbinServer() (ts *httptest.Server) {
 		default:
 			_, _ = w.Write([]byte("404 " + path))
 		}
-	})
+	}, isTls)
 
 	return ts
 }
@@ -169,7 +170,7 @@ func createEchoServer() (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		res := dumpRequest(r)
 		_, _ = w.Write([]byte(res))
-	})
+	}, false)
 
 	return ts
 }
@@ -202,7 +203,19 @@ func dumpRequest(request *http.Request) string {
 	return r.String()
 }
 
-func createTestServer(fn func(w http.ResponseWriter, r *http.Request)) (ts *httptest.Server) {
-	ts = httptest.NewServer(http.HandlerFunc(fn))
+func createTestServer(fn func(w http.ResponseWriter, r *http.Request), isTls bool) (ts *httptest.Server) {
+	if !isTls {
+		// 1. http test server
+		ts = httptest.NewServer(http.HandlerFunc(fn))
+	} else {
+		// 2. https test server: https://stackoverflow.com/questions/54899550/create-https-test-server-for-any-client
+		ts = httptest.NewUnstartedServer(http.HandlerFunc(fn))
+		cert, err := tls.LoadX509KeyPair("./conf/local.com.crt", "./conf/local.com.key")
+		if err != nil {
+			panic(err)
+		}
+		ts.TLS = &tls.Config{Certificates: []tls.Certificate{cert}}
+		ts.StartTLS()
+	}
 	return ts
 }

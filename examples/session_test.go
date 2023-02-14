@@ -8,7 +8,7 @@ import (
 
 // Test Session with cookie
 func TestSessionWithCookie(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	sess := requests.R().SetDebug()

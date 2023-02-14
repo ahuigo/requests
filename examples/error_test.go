@@ -27,7 +27,7 @@ func TestError(t *testing.T) {
 	t.Log(err)
 }
 func TestErrorTimeout(t *testing.T) {
-	ts := createHttpbinServer()
+	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	// resp, err := requests.Get("https://httpbin.org/json")
