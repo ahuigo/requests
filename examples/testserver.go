@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const maxMultipartMemory = 4 << 30 // 4MB
+
 func createHttpbinServer() (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		switch path := r.URL.Path; {
@@ -21,6 +23,8 @@ func createHttpbinServer() (ts *httptest.Server) {
 			getHandler(w, r)
 		case path == "/post":
 			postHandler(w, r)
+		case path == "/file":
+			fileHandler(w, r)
 		case path == "/sleep":
 			sleepHandler(w, r)
 		case path == "/cookie/count":
@@ -40,6 +44,41 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		"headers": dumpRequestHeader(r),
 		"args":    parseRequestArgs(r),
 		"body":    string(body),
+	}
+	buf, _ := json.Marshal(m)
+	_, _ = w.Write(buf)
+}
+
+func fileHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := r.ParseMultipartForm(maxMultipartMemory); err != nil {
+		if err != http.ErrNotMultipart {
+			panic(fmt.Sprintf("error on parse multipart form array: %v", err))
+		}
+	}
+	// parse form data
+	formData := make(map[string]string)
+	for k, vs := range r.PostForm {
+		for _, v := range vs {
+			formData[k] = v
+		}
+	}
+	// parse files
+	files := make(map[string]string)
+	if r.MultipartForm != nil && r.MultipartForm.File != nil {
+		for key, fhs := range r.MultipartForm.File {
+			// if len(fhs)>0
+			// f, err := fhs[0].Open()
+			files[key] = fhs[0].Filename
+		}
+	}
+
+	//output
+	m := map[string]interface{}{
+		"headers": dumpRequestHeader(r),
+		"args":    parseRequestArgs(r),
+		"form":    formData,
+		"files":   files,
 	}
 	buf, _ := json.Marshal(m)
 	_, _ = w.Write(buf)
