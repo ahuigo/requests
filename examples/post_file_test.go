@@ -7,14 +7,20 @@ import (
 	"github.com/ahuigo/requests"
 )
 
+/*
+curl "https://www.httpbin.org/post" -F 'file1=@./go.mod' -F 'file2=@./version' -F 'name=alex'
+*/
 func TestPostFile(t *testing.T) {
 	path, _ := os.Getwd()
 
 	resp, err := requests.Post(
 		"https://www.httpbin.org/post",
 		requests.Files{
-			"file1": path + "/README.md",
+			"file1": path + "/go.mod",
 			"file2": path + "/version",
+		},
+		requests.FormData{
+			"name": "alex",
 		},
 	)
 	if err != nil {
@@ -24,10 +30,16 @@ func TestPostFile(t *testing.T) {
 		Files struct {
 			File2 string
 		}
+		Form struct {
+			Name string
+		}
 	}{}
 	resp.Json(&data)
 	if data.Files.File2 == "" {
-		t.Error("invalid response body:", resp.Text())
+		t.Error("invalid response files:", resp.Text())
+	}
+	if data.Form.Name == "" {
+		t.Error("invalid response forms:", resp.Text())
 	}
 
 }
