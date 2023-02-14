@@ -127,16 +127,21 @@ go get -u github.com/ahuigo/requests
     }
 
 ### PostFiles
+An example about post both `file` and `form data`:
 
+    // curl "https://www.httpbin.org/post" -F 'file1=@./go.mod' -F 'file2=@./version' -F 'name=alex'
 	path, _ := os.Getwd()
 	session := requests.R()
 
 	resp, err := session.SetDebug().Post(
 		"https://www.httpbin.org/post",
 		requests.Files{
-            "file1": path + "/README.md",
+            "file1": path + "/go.mod",
             "file2": path + "/version",
         },
+        requests.FormData{
+			"name": "alex",
+		},
 	)
 	if err == nil {
 		fmt.Println(resp.Text())
