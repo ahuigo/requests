@@ -8,12 +8,16 @@ import (
 
 func TestSkipSsl(t *testing.T) {
 	session := requests.R()
+	// fake CA certificate
+	session.SetCaCert("conf/rootCA.crt")
+	// skip ssl
 	session = session.SkipSsl(true)
-	resp, err:= session.Get("https://www.httpbin.org/get")
-	if err!= nil {
+
+	resp, err := session.Get("https://www.httpbin.org/get")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Text()==""{
+	if resp.Text() == "" {
 		t.Fatal(resp.Text())
 	}
 }

@@ -2,7 +2,9 @@ package requests
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,26 +34,45 @@ func (session *Session) Proxy(proxyurl string) {
 	}
 }
 
+// In generally, you could SystemCertPool instead of NewCertPool to keep existing certs.
+func (session *Session) SetCaCert(caCertPath string) *Session {
+	caCert, err := ioutil.ReadFile(caCertPath)
+	if err != nil {
+		panic(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	tlsConf := session.getTLSClientConfig()
+	tlsConf.RootCAs = caCertPool
+	return session
+}
+
 // SkipSsl
-func (session *Session) SkipSsl(v bool) *Session{
+func (session *Session) SkipSsl(v bool) *Session {
+	tlsConf := session.getTLSClientConfig()
+	tlsConf.InsecureSkipVerify = v
+	return session
+}
+
+func (session *Session) getTLSClientConfig() *tls.Config {
+	tp := session.getTransport()
+	tlsConf := tp.TLSClientConfig
+	if tlsConf == nil {
+		tlsConf = &tls.Config{}
+	}
+	return tlsConf
+}
+
+func (session *Session) getTransport() *http.Transport {
 	transport := session.Client.Transport
 	if transport == nil {
 		transport = &http.Transport{
 			TLSClientConfig: &tls.Config{},
 		}
+		session.Client.Transport = transport
 	}
-
-	switch tp := transport.(type){
-		case *http.Transport:
-			tlsConf := tp.TLSClientConfig
-			if tlsConf ==nil{
-				tlsConf = &tls.Config{}
-			}
-			tlsConf.InsecureSkipVerify= v
-
-	}
-	session.Client.Transport = transport
-	return session
+	return transport.(*http.Transport)
 }
 
 func (session *Session) SetRespHandler(fn func(*Response) error) *Session {
