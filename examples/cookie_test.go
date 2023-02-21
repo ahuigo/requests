@@ -2,7 +2,6 @@ package examples
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -15,19 +14,26 @@ func TestSendCookie(t *testing.T) {
 	defer ts.Close()
 
 	resp, err := requests.Get(ts.URL+"/cookie/count",
-		requests.Header{"Cookie": "id_token=1234"},
+		requests.Header{"Cookie": "token=1234"},
 	)
 	if err != nil {
 		panic(err)
 	}
-	data := map[string]interface{}{}
+	data := struct {
+		Cookies struct{ Token string }
+	}{}
 	resp.Json(&data)
-	fmt.Println(data)
+	if data.Cookies.Token != "1234" {
+		t.Errorf("Can not read cookie from response:%s", resp.Text())
+	}
 
 }
 
 // Test session Cookie
 func TestSessionCookie(t *testing.T) {
+	ts := createHttpbinServer(false)
+	defer ts.Close()
+
 	cookie1 := &http.Cookie{
 		Name:  "name1",
 		Value: "value1",
@@ -40,10 +46,10 @@ func TestSessionCookie(t *testing.T) {
 	session := requests.R().SetDebug()
 
 	// 1. set cookie1
-	session.SetCookie(cookie1).Get("https://www.httpbin.org/get")
+	session.SetCookie(cookie1).Get(ts.URL + "/cookie/count")
 
 	// 2. set cookie2 and get all cookies
-	resp, err := session.Get("https://www.httpbin.org/get", cookie2)
+	resp, err := session.Get(ts.URL+"/cookie/count", cookie2)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +69,10 @@ func TestSessionCookie(t *testing.T) {
 
 // Test session Cookie
 func TestSessionCookieWithClone(t *testing.T) {
-	url := "https://www.httpbin.org/get"
+	ts := createHttpbinServer(false)
+	url := ts.URL + "/cookie/count"
+	defer ts.Close()
+
 	cookie1 := &http.Cookie{
 		Name:  "name1",
 		Value: "value1",
@@ -73,7 +82,7 @@ func TestSessionCookieWithClone(t *testing.T) {
 		Name:  "name2",
 		Value: "value2",
 	}
-	session := requests.R().SetDebug()
+	session := requests.R().SetDebugBody()
 
 	// 1. set cookie1
 	session.SetCookie(cookie1).Get(url)

@@ -112,8 +112,14 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func cookieHandler(w http.ResponseWriter, r *http.Request) {
+
 	switch r.URL.Path {
 	case "/cookie/count":
+		reqCookies := map[string]string{}
+		for _, c := range r.Cookies() {
+			reqCookies[c.Name] = c.Value
+		}
+
 		count := "1"
 		cookie, err := r.Cookie("count")
 		if err == nil {
@@ -128,6 +134,7 @@ func cookieHandler(w http.ResponseWriter, r *http.Request) {
 			"args":    parseRequestArgs(r),
 			"body":    string(body),
 			"count":   count,
+			"cookies": reqCookies,
 			"headers": dumpRequestHeader(r),
 		}
 		buf, _ := json.Marshal(m)

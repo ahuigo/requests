@@ -84,25 +84,27 @@ func TestPostFormData(t *testing.T) {
 // Post Json: application/json
 // curl -H "Content-Type: application/json" https://www.httpbin.org/post -d '{"name":"Alex"}'
 func TestPostJson(t *testing.T) {
-	println("Test POST: post json data")
+	ts := createHttpbinServer(false)
+	defer ts.Close()
+
 	// You can also use `json := requests.Jsoni(anyTypeData)`
 	json := requests.Json{
 		"name": "Alex",
 	}
-	resp, err := requests.Post("https://www.httpbin.org/post", json)
+	resp, err := requests.Post(ts.URL+"/post", json)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// parse data
 	var data = struct {
-		Data string
+		Body string
 	}{}
 	resp.Json(&data)
 
 	// is expected results
 	jsonData, _ := ejson.Marshal(json) // if data.Data!= "{\"name\":\"Alex\"}"{
-	if data.Data != string(jsonData) {
+	if data.Body != string(jsonData) {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
@@ -129,7 +131,7 @@ func TestRawBytes(t *testing.T) {
 }
 
 // Post Raw String: text/plain
-// curl -H "Content-Type: text/plain" https://www.httpbin.org/post -d 'raw data: Hi, Jack!'
+// curl -H "Content-Type: text/plain" http://0:4500/post -d 'raw data: Hi, Jack!'
 func TestRawString1(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
