@@ -3,7 +3,6 @@ package requests
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -21,17 +20,17 @@ func (session *Session) Close() {
 	session.httpreq.Close = true
 }
 
-func (session *Session) Proxy(proxyurl string) {
+func (session *Session) SetProxy(proxyurl string) *Session {
 	urli := url.URL{}
 	urlproxy, err := urli.Parse(proxyurl)
 	if err != nil {
-		fmt.Println("Set proxy failed")
-		return
+		println("SetProxy, Bad proxy:" + proxyurl)
+		return session
 	}
-	session.Client.Transport = &http.Transport{
-		Proxy:           http.ProxyURL(urlproxy),
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
+	transport := session.getTransport()
+	transport.Proxy = http.ProxyURL(urlproxy)
+	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	return session
 }
 
 // In generally, you could SystemCertPool instead of NewCertPool to keep existing certs.

@@ -9,10 +9,13 @@ import (
 )
 
 // Post QueryString and content-type: none
+// curl -X POST "https://www.httpbin.org/post?name=ahuigo"
 func TestPostParams(t *testing.T) {
-	println("Test POST: post params")
+	ts := createHttpbinServer(false)
+	defer ts.Close()
+
 	resp, err := requests.Post(
-		"https://www.httpbin.org/post",
+		ts.URL+"/post",
 		requests.Params{
 			"name": "ahuigo",
 		},
@@ -32,6 +35,7 @@ func TestPostParams(t *testing.T) {
 }
 
 // Post Form UrlEncoded data: application/x-www-form-urlencoded
+// curl -H 'Content-Type: application/x-www-form-urlencoded' https://www.httpbin.org/post -d 'name=ahuigo'
 func TestPostFormUrlEncode(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
@@ -54,6 +58,7 @@ func TestPostFormUrlEncode(t *testing.T) {
 }
 
 // Test POST:  multipart/form-data; boundary=....
+// curl https://www.httpbin.org/post -F 'name=ahuigo'
 func TestPostFormData(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
@@ -77,6 +82,7 @@ func TestPostFormData(t *testing.T) {
 }
 
 // Post Json: application/json
+// curl -H "Content-Type: application/json" https://www.httpbin.org/post -d '{"name":"Alex"}'
 func TestPostJson(t *testing.T) {
 	println("Test POST: post json data")
 	// You can also use `json := requests.Jsoni(anyTypeData)`
@@ -102,6 +108,7 @@ func TestPostJson(t *testing.T) {
 }
 
 // Post Raw Bypes: text/plain
+// curl -H "Content-Type: text/plain" https://www.httpbin.org/post -d 'raw data: Hi, Jack!'
 func TestRawBytes(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
@@ -122,6 +129,7 @@ func TestRawBytes(t *testing.T) {
 }
 
 // Post Raw String: text/plain
+// curl -H "Content-Type: text/plain" https://www.httpbin.org/post -d 'raw data: Hi, Jack!'
 func TestRawString1(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
@@ -140,32 +148,17 @@ func TestRawString1(t *testing.T) {
 		t.Error("invalid response body:", resp.Text())
 	}
 }
+
+// Post Raw String2: text/plain
+// curl -H "Content-Type: text/plain" https://www.httpbin.org/post -d 'raw data: Hi, Jack!'
 func TestRawString2(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
 
 	println("Test POST: raw post data ")
 	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post(ts.URL+"/post", rawText,
-		requests.ContentTypePlain,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var data interface{}
-	resp.Json(&data)
-	if data.(map[string]interface{})["body"].(string) != rawText {
-		t.Error("invalid response body:", resp.Text())
-	}
-}
-
-func TestRawString3(t *testing.T) {
-	ts := createHttpbinServer(false)
-	defer ts.Close()
-
-	println("Test POST: raw post data ")
-	rawText := "raw data: Hi, Jack!"
-	resp, err := requests.Post(ts.URL+"/post",
+	resp, err := requests.Post(
+		ts.URL+"/post",
 		requests.ContentTypePlain,
 		rawText,
 	)
@@ -180,6 +173,7 @@ func TestRawString3(t *testing.T) {
 }
 
 // TestPostEncodedString: application/x-www-form-urlencoded
+// curl -H 'Content-Type: application/x-www-form-urlencoded' http://0:4500/post -d 'name=Alex&age=29'
 func TestPostEncodedString(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()

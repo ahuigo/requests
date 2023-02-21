@@ -33,8 +33,24 @@ go get -u github.com/ahuigo/requests
         }
     }
 
-
 ## Post
+
+### Debug Mode
+Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
+
+	session := requests.R()
+	resp, err := session.SetDebug().Post(
+		"https://www.httpbin.org/post",
+		requests.Files{
+            "file1": "/README.md",
+            "file2": "/version",
+        },
+	)
+    /* Output:
+     curl -X POST -F 'file1=@/README.md' -F 'file2=@/version' https://www.httpbin.org/post
+     .....
+     */
+
 
 ### Post params
 
@@ -189,19 +205,6 @@ Warning: Session is not safe in multi goroutines. You can not do as following:
 
     session := Requests.R()
     session.SetTimeout(20*time.Second)
-
-### Debug Mode
-Refer to https://github.com/ahuigo/requests/blob/master/examples/debug_test.go
-
-	session := requests.R()
-
-	resp, err := session.SetDebug().Post(
-		"https://www.httpbin.org/post",
-		requests.Files{
-            "file1": "/README.md",
-            "file2": "/version",
-        },
-	)
 
 ### Set Authentication
     session := requests.R()
