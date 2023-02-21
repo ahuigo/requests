@@ -12,7 +12,7 @@ func TestRetryCondition(t *testing.T) {
 
 	// retry 3 times
 	maxRetries := 3
-	r := requests.R().
+	r := requests.R().SetDebug().
 		SetRetryCount(maxRetries).
 		SetRetryCondition(func(resp *requests.Response, err error) bool {
 			if err != nil {
@@ -23,7 +23,7 @@ func TestRetryCondition(t *testing.T) {
 			return json["headers"] != "a"
 		})
 
-	resp, err := r.Get(ts.URL + "/get")
+	resp, err := r.Post(ts.URL+"/post", []byte("alex"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,12 +32,17 @@ func TestRetryCondition(t *testing.T) {
 		t.Fatalf("Attemp %d not equal to %d", resp.Attempt, maxRetries)
 	}
 
-	var json map[string]interface{}
+	var json map[string]string
 	resp.Json(&json)
-	t.Logf("response json:%#v\n", json["headers"])
+	if json["body"] != "alex" {
+		t.Fatalf("Bad response body:%s", resp.Text())
+	}
+	if json["method"] != "POST" {
+		t.Fatalf("Bad request method:%s", resp.Text())
+	}
 }
 
-func TestRetryCondition2(t *testing.T) {
+func TestRetryConditionFalse(t *testing.T) {
 	ts := createHttpbinServer(false)
 	defer ts.Close()
 

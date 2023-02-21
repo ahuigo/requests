@@ -1,6 +1,6 @@
 module github.com/ahuigo/requests
 
-go 1.15
+go 1.17
 
 require (
 	github.com/alessio/shellescape v1.4.1

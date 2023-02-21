@@ -13,6 +13,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 package requests
 
 import (
+	"os"
 	"strings"
 	"time"
 
@@ -27,19 +28,21 @@ func SetRespHandler(fn func(*Response) error) {
 
 // Run
 func (session *Session) Run(origurl string, args ...interface{}) (resp *Response, err error) {
-	if session.retryCount==0{
+	if session.retryCount == 0 {
 		return session.execute(origurl, args...)
 	}
 
 	var retryConditions []RetryConditionFunc
-	if session.retryConditionFunc!=nil{
+	if session.retryConditionFunc != nil {
 		retryConditions = []RetryConditionFunc{session.retryConditionFunc}
 	}
-	attempt:=0
+	attempt := 0
+	method := session.httpreq.Method
 	err = Backoff(
 		func() (*Response, error) {
+			session.httpreq.Method = method
 			resp, err = session.execute(origurl, args...)
-			if resp!=nil{
+			if resp != nil {
 				resp.Attempt = attempt
 			}
 			attempt++
@@ -51,8 +54,6 @@ func (session *Session) Run(origurl string, args ...interface{}) (resp *Response
 	)
 	return resp, err
 }
-
-
 
 // RunRaw -
 func (session *Session) execute(origurl string, args ...interface{}) (resp *Response, err error) {
@@ -67,7 +68,8 @@ func (session *Session) execute(origurl string, args ...interface{}) (resp *Resp
 		if strings.Contains(err.Error(), "Timeout exceeded while awaiting headers") {
 			err = rerrors.Wrapf(rerrors.NetworkTimeout, err, "%s %s", session.httpreq.Method, origurl)
 		} else {
-			err = rerrors.Wrapf(rerrors.NetworkError, err, "%s %s", session.httpreq.Method, origurl)
+			hostname, _ := os.Hostname()
+			err = rerrors.Wrapf(rerrors.NetworkError, err, "%s %s,client:%s", session.httpreq.Method, origurl, hostname)
 		}
 		return nil, err
 	}

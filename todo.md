@@ -9,3 +9,13 @@
       Timeout:   10 * time.Second,
       Transport: t,
     }
+
+## Support custom Transport
+
+   http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = 1
+    http.DefaultTransport.(*http.Transport).MaxIdleConns= 1
+    r = requests.R()
+    for i := 1; i < 10000; i++ {
+                go  r.Get(url)
+    }
+    

@@ -45,6 +45,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		"headers": dumpRequestHeader(r),
 		"args":    parseRequestArgs(r),
 		"body":    string(body),
+		"method":  r.Method,
 	}
 	buf, _ := json.Marshal(m)
 	_, _ = w.Write(buf)
