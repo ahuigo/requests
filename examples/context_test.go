@@ -22,15 +22,16 @@ func TestSetContextCancelMulti(t *testing.T) {
 	}, false)
 	defer ts.Close()
 
-	client := requests.R()
+	// client
 	ctx, cancel := context.WithCancel(context.Background())
+	client := requests.R().SetContext(ctx)
 	go func() {
 		time.Sleep(1 * time.Microsecond)
 		cancel()
 	}()
 
 	// first
-	_, err := client.SetContext(ctx).Get(ts.URL + "/get")
+	_, err := client.Get(ts.URL + "/get")
 	if !errIsContextCancel(err) {
 		t.Fatalf("Got unexpected error: %v", err)
 	}

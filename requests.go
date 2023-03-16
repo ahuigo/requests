@@ -75,15 +75,17 @@ func (session *Session) execute(origurl string, args ...interface{}) (resp *Resp
 		return nil, err
 	}
 
+	traceInfo := session.clientTrace.TraceInfo()
 	resp = &Response{
 		R:           res,
+		TraceInfo:   &traceInfo,
+		dumpCurl:    dumpCurl,
 		startTime:   startTime,
 		endTime:     time.Now(),
 		httpreq:     session.httpreq,
 		client:      session.Client,
 		isdebug:     session.isdebug,
 		isdebugBody: session.isdebugBody,
-		dumpCurl:    dumpCurl,
 	}
 	resp.ResponseDebug()
 	resp.SetStartEndTime(startTime, time.Now())

@@ -28,6 +28,7 @@ type Session struct {
 	retryCount         int
 	retryWaitTime      time.Duration
 	retryConditionFunc func(*Response, error) bool
+	clientTrace        *clientTrace
 }
 
 type Header map[string]string
@@ -180,6 +181,13 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		session.httpreq = session.httpreq.WithContext(ctx)
 	}
 
+	// set trace context
+	if session.isdebug {
+		trace := clientTraceNew(session.httpreq.Context())
+		session.clientTrace = trace
+		session.httpreq = session.httpreq.WithContext(trace.ctx)
+	}
+
 	// set host
 	host := session.httpreq.Header.Get("Host")
 	if host != "" {
@@ -202,6 +210,7 @@ func (session *Session) reset() {
 		ProtoMajor: 1,
 		ProtoMinor: 1,
 	}
+	session.clientTrace = nil
 
 }
 

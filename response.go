@@ -27,10 +27,11 @@ import (
 
 type Response struct {
 	R            *http.Response
-	Attempt int
+	Attempt      int
 	body         []byte
 	httpreq      *http.Request
 	client       *http.Client
+	TraceInfo    *TraceInfo
 	isdebug      bool
 	isdebugBody  bool
 	startTime    time.Time

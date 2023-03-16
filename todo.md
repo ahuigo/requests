@@ -1,3 +1,10 @@
+# Split client and request
+client:
+
+    Request:
+        traceInfo
+        rawRequest
+        ...
 # Optimize client 
     t := http.DefaultTransport.(*http.Transport).Clone()
     t.MaxIdleConns = 100
