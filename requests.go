@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/ahuigo/requests/rerrors"
+	"github.com/pkg/errors"
 )
 
 var respHandler func(*Response) error
@@ -66,10 +67,10 @@ func (session *Session) execute(origurl string, args ...interface{}) (resp *Resp
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Timeout exceeded while awaiting headers") {
-			err = rerrors.Wrapf(rerrors.NetworkTimeout, err, "%s %s", session.httpreq.Method, origurl)
+			err = errors.Wrapf(err, "%s %s '%s'", rerrors.NetworkTimeout, session.httpreq.Method, origurl)
 		} else {
 			hostname, _ := os.Hostname()
-			err = rerrors.Wrapf(rerrors.NetworkError, err, "%s %s,client:%s", session.httpreq.Method, origurl, hostname)
+			err = errors.Wrapf(err, "%s %s '%s',client:%s", rerrors.NetworkError, session.httpreq.Method, origurl, hostname)
 		}
 		return nil, err
 	}

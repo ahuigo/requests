@@ -3,8 +3,7 @@ package rerrors
 import (
 	"fmt"
 
-	// "github.com/pkg/errors"
-	"errors"
+	"github.com/pkg/errors"
 )
 
 type ErrorType string
@@ -34,18 +33,7 @@ func New(errType ErrorType, msg string) *Error {
 }
 
 func Errorf(errType ErrorType, format string, args ...interface{}) *Error {
-	// err := errors.Errorf(format, args...)
-	err := fmt.Errorf(format, args...)
-	return &Error{
-		ErrType: errType,
-		Err:     err,
-	}
-}
-
-func Wrapf(errType ErrorType, err error, format string, args ...interface{}) *Error {
-	// err = errors.Wrapf(err, format, args...)
-	s := fmt.Sprintf(format, args...)
-	err = fmt.Errorf("%s|%s", err.Error(), s)
+	err := errors.Errorf(format, args...)
 	return &Error{
 		ErrType: errType,
 		Err:     err,
@@ -53,8 +41,15 @@ func Wrapf(errType ErrorType, err error, format string, args ...interface{}) *Er
 }
 
 func Wrap(errType ErrorType, err error, msg string) *Error {
-	// err = errors.Wrap(err, msg)
-	err = fmt.Errorf("%s|%s", err.Error(), msg)
+	err = errors.Wrap(err, msg)
+	return &Error{
+		ErrType: errType,
+		Err:     err,
+	}
+}
+
+func Wrapf(errType ErrorType, err error, format string, args ...interface{}) *Error {
+	err = errors.Wrapf(err, format, args...)
 	return &Error{
 		ErrType: errType,
 		Err:     err,

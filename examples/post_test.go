@@ -8,7 +8,7 @@ import (
 	"github.com/ahuigo/requests"
 )
 
-// Post QueryString and content-type: none
+// Post Params: use <QueryString> with content-type: none
 // curl -X POST "https://www.httpbin.org/post?name=ahuigo"
 func TestPostParams(t *testing.T) {
 	ts := createHttpbinServer(false)
@@ -34,7 +34,7 @@ func TestPostParams(t *testing.T) {
 	}
 }
 
-// Post Form UrlEncoded data: application/x-www-form-urlencoded
+// Post Datas: use <Form UrlEncoded data> with application/x-www-form-urlencoded
 // curl -H 'Content-Type: application/x-www-form-urlencoded' https://www.httpbin.org/post -d 'name=ahuigo'
 func TestPostFormUrlEncode(t *testing.T) {
 	ts := createHttpbinServer(false)
@@ -57,7 +57,7 @@ func TestPostFormUrlEncode(t *testing.T) {
 	}
 }
 
-// Test POST:  multipart/form-data; boundary=....
+// POST FormData: multipart/form-data; boundary=....
 // curl https://www.httpbin.org/post -F 'name=ahuigo'
 func TestPostFormData(t *testing.T) {
 	ts := createHttpbinServer(false)
@@ -81,7 +81,7 @@ func TestPostFormData(t *testing.T) {
 	}
 }
 
-// Post Json: application/json
+// POST Json: application/json
 // curl -H "Content-Type: application/json" https://www.httpbin.org/post -d '{"name":"Alex"}'
 func TestPostJson(t *testing.T) {
 	ts := createHttpbinServer(false)

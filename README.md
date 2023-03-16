@@ -286,23 +286,6 @@ https://github.com/ahuigo/requests/blob/master/examples/cookie_test.go
         }
     }
 
-## Return Error
-    func TestError(t *testing.T) {
-        _, err := requests.Get("http://127.0.0.1:12346/connect-refused")
-        if err2, ok := err.(*rerrors.Error); !ok {
-            t.Fatalf("unexpected error:%+v", err)
-        } else {
-            switch err2.ErrType {
-            case rerrors.NetworkError:
-                t.Log(err2.ErrType)
-            case rerrors.URLError:
-                t.Log(err2.ErrType)
-            default:
-                t.Log(err2.ErrType)
-            }
-        }
-    }
-
 # Utils
 
 ## Build Request

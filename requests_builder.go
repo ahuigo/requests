@@ -13,11 +13,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/ahuigo/requests/rerrors"
 )
-
-
 
 type Session struct {
 	httpreq     *http.Request
@@ -26,10 +22,11 @@ type Session struct {
 	isdebugBody bool
 	respHandler func(*Response) error
 	// session header
-	gHeader     map[string]string
-	initCookies []*http.Cookie
-	retryCount int
-	retryWaitTime time.Duration
+	gHeader            map[string]string
+	initCookies        []*http.Cookie
+	initContext        context.Context
+	retryCount         int
+	retryWaitTime      time.Duration
 	retryConditionFunc func(*Response, error) bool
 }
 
@@ -85,10 +82,6 @@ func NewHttpClient() *http.Client {
 	return client
 }
 
-func (session *Session) setContext(ctx context.Context) {
-	session.httpreq = session.httpreq.WithContext(ctx)
-}
-
 // BuildRequest
 func (session *Session) BuildRequest(method, origurl string, args ...interface{}) (*http.Request, error) {
 	var params map[string]string
@@ -102,7 +95,7 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	for _, arg := range args {
 		switch arg := arg.(type) {
 		case context.Context:
-			session.setContext(arg)
+			session.SetContext(arg)
 		// arg is Header , set to request header
 		case Header:
 			for k, v := range arg {
@@ -128,12 +121,12 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 			dataType = ContentTypeFormData
 			files = append(files, arg)
 		case string:
-			if dataType ==""{
+			if dataType == "" {
 				dataType = ContentTypeFormEncode
 			}
 			bodyBytes = []byte(arg)
 		case []byte:
-			if dataType ==""{
+			if dataType == "" {
 				dataType = ContentTypePlain
 			}
 			bodyBytes = arg
@@ -148,11 +141,10 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 
 	URL, err := buildURLParams(origurl, params, paramsArray)
 	if err != nil {
-		err = rerrors.Wrapf(rerrors.URLError, err, "bad url:%s", origurl)
 		return nil, err
 	}
 	if URL.Scheme == "" || URL.Host == "" {
-		err = rerrors.Errorf(rerrors.URLError, "bad url:%s", origurl)
+		err = &url.Error{Op: "parse", URL: origurl, Err: fmt.Errorf("failed")}
 		return nil, err
 	}
 
@@ -162,7 +154,7 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		if len(datas) > 0 {
 			formEncodeValues := session.buildFormEncode(datas...)
 			session.setBodyFormEncode(formEncodeValues)
-		}else{
+		} else {
 			session.setBodyBytes(bodyBytes)
 		}
 	case ContentTypeFormData:
@@ -182,6 +174,11 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 	}
 
 	session.httpreq.URL = URL
+
+	// set context
+	if ctx := session.initContext; ctx != nil {
+		session.httpreq = session.httpreq.WithContext(ctx)
+	}
 
 	// set host
 	host := session.httpreq.Header.Get("Host")
@@ -221,7 +218,7 @@ func (session *Session) Clone() *Session {
 }
 
 func (session *Session) setContentType(ct string) {
-	// session.httpreq.Header.Get("Content-Type") == "" && 
+	// session.httpreq.Header.Get("Content-Type") == "" &&
 	if ct != "" {
 		session.httpreq.Header.Set("Content-Type", ct)
 	}

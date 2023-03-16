@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"io/ioutil"
@@ -13,6 +14,12 @@ import (
 // set timeout s = second
 func (session *Session) SetTimeout(n time.Duration) *Session {
 	session.Client.Timeout = n
+	return session
+}
+
+func (session *Session) SetContext(ctx context.Context) *Session {
+	// build request: session.httpreq = session.httpreq.WithContext(ctx)
+	session.initContext = ctx
 	return session
 }
 
