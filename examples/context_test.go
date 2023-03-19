@@ -6,6 +6,7 @@ package examples
 import (
 	"context"
 	"net/http"
+	"net/http/httptrace"
 	"testing"
 	"time"
 
@@ -44,7 +45,7 @@ func TestSetContextCancelMulti(t *testing.T) {
 }
 
 // test context: cancel with chan
-func TestSetContextCancelChan(t *testing.T) {
+func TestSetContextCancelWithChan(t *testing.T) {
 	ch := make(chan struct{})
 	ts := createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -80,4 +81,42 @@ func TestSetContextCancelChan(t *testing.T) {
 	if !errIsContextCancel(err) {
 		t.Fatalf("Got unexpected error: %v", err)
 	}
+}
+
+// test with trace context
+func TestContextWithTrace(t *testing.T) {
+	ts := createTestServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("TestSetContextWithTrace: response"))
+	}, false)
+	defer ts.Close()
+
+	//1. Create Trace context
+	traceInfo := struct {
+		dnsDone     time.Time
+		connectDone time.Time
+	}{}
+
+	trace := &httptrace.ClientTrace{
+		ConnectStart: func(network, addr string) {
+			traceInfo.dnsDone = time.Now()
+			t.Log(time.Now(), "ConnectStart:", "network=", network, ",addr=", addr)
+		},
+		ConnectDone: func(network, addr string, err error) {
+			traceInfo.connectDone = time.Now()
+			t.Log(time.Now(), "ConnectDone:", "network=", network, ",addr=", addr)
+		},
+	}
+	ctx := httptrace.WithClientTrace(context.Background(), trace)
+
+	//2. Send request with Trace context
+	session := requests.R().SetContext(ctx)
+	params := requests.Params{"name": "ahuigo", "page": "1"}
+	_, err := session.Get(ts.URL+"/get", params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if traceInfo.connectDone.Sub(traceInfo.dnsDone) <= 0 {
+		t.Fatal("Bad trace info")
+	}
+
 }

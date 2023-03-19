@@ -2,7 +2,7 @@ package examples
 
 import (
 	"bytes"
-	"io/ioutil"
+	ioutil "io"
 	"net/http"
 	"testing"
 

@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	ioutil "io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"

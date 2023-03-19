@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"io/ioutil"
+	ioutil "io"
 	"regexp"
 	"testing"
 
