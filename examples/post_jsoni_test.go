@@ -9,7 +9,7 @@ import (
 
 // Post Json: application/json
 func TestPostJsonInterface(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	anyTypeData := map[string]interface{}{

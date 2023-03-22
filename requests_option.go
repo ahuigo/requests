@@ -34,7 +34,7 @@ func (session *Session) SetProxy(proxyurl string) *Session {
 		println("SetProxy, Bad proxy:" + proxyurl)
 		return session
 	}
-	transport := session.getTransport()
+	transport := session.GetTransport()
 	transport.Proxy = http.ProxyURL(urlproxy)
 	transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	return session
@@ -62,7 +62,7 @@ func (session *Session) SkipSsl(v bool) *Session {
 }
 
 func (session *Session) getTLSClientConfig() *tls.Config {
-	tp := session.getTransport()
+	tp := session.GetTransport()
 	tlsConf := tp.TLSClientConfig
 	if tlsConf == nil {
 		tlsConf = &tls.Config{}
@@ -70,7 +70,7 @@ func (session *Session) getTLSClientConfig() *tls.Config {
 	return tlsConf
 }
 
-func (session *Session) getTransport() *http.Transport {
+func (session *Session) GetTransport() *http.Transport {
 	transport := session.Client.Transport
 	if transport == nil {
 		transport = &http.Transport{

@@ -8,7 +8,7 @@ import (
 
 // Get example: fetch json response
 func TestGetJson(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, err := requests.Get("https://httpbin.org/json")
@@ -25,7 +25,7 @@ func TestGetJson(t *testing.T) {
 
 // Get with params
 func TestGetParams(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	params := requests.Params{"name": "ahuigo", "page": "1"}
@@ -50,7 +50,7 @@ func TestGetParams(t *testing.T) {
 
 // Support array args like: ids=id1&ids=id2&ids=id3
 func TestGetParamArray(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	params := requests.Params{"name": "ahuigo"}
@@ -77,7 +77,7 @@ func TestGetParamArray(t *testing.T) {
 }
 
 func TestGetWithHeader(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	params := requests.Params{"name": "ahuigo"}

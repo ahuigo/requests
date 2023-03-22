@@ -7,7 +7,7 @@ import (
 )
 
 func TestRetryCondition(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// retry 3 times
@@ -43,7 +43,7 @@ func TestRetryCondition(t *testing.T) {
 }
 
 func TestRetryConditionFalse(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// retry 3 times

@@ -10,7 +10,7 @@ import (
 )
 
 func TestSendCookie(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	resp, err := requests.Get(ts.URL+"/cookie/count",
@@ -31,7 +31,7 @@ func TestSendCookie(t *testing.T) {
 
 // Test session Cookie
 func TestSessionCookie(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	cookie1 := &http.Cookie{
@@ -69,7 +69,7 @@ func TestSessionCookie(t *testing.T) {
 
 // Test session Cookie
 func TestSessionCookieWithClone(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	url := ts.URL + "/cookie/count"
 	defer ts.Close()
 
@@ -109,7 +109,7 @@ func TestSessionCookieWithClone(t *testing.T) {
 
 // Test Set-Cookie
 func TestResponseCookie(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, err := requests.Get("https://httpbin.org/json")
@@ -125,7 +125,7 @@ func TestResponseCookie(t *testing.T) {
 }
 
 func TestResponseBuildCookie(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, err := requests.Get("https://httpbin.org/json")

@@ -20,7 +20,7 @@ func TestSetContextCancelMulti(t *testing.T) {
 		n, err := w.Write([]byte("TestSetContextCancel: response"))
 		t.Logf("%s Server: wrote %d bytes", time.Now(), n)
 		t.Logf("%s Server: err is %v ", time.Now(), err)
-	}, false)
+	}, 0)
 	defer ts.Close()
 
 	// client
@@ -61,7 +61,7 @@ func TestSetContextCancelWithChan(t *testing.T) {
 		t.Logf("%s Server: wrote %d bytes", time.Now(), n)
 		t.Logf("%s Server: err is %v ", time.Now(), err)
 
-	}, false)
+	}, 0)
 	defer ts.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -87,7 +87,7 @@ func TestSetContextCancelWithChan(t *testing.T) {
 func TestContextWithTrace(t *testing.T) {
 	ts := createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("TestSetContextWithTrace: response"))
-	}, false)
+	}, 0)
 	defer ts.Close()
 
 	//1. Create Trace context

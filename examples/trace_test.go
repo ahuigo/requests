@@ -11,7 +11,7 @@ import (
 
 // test context: cancel multi
 func TestTrace(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	params := requests.Params{"name": "ahuigo", "page": "1"}

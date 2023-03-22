@@ -12,7 +12,7 @@ An example about post both `file` and `form data`:
 curl "https://www.httpbin.org/post" -F 'file1=@./go.mod' -F 'file2=@./version' -F 'name=alex'
 */
 func TestPostFile(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	path, _ := os.Getwd()

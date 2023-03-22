@@ -9,7 +9,7 @@ import (
 
 // Test Response
 func TestResponse(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, _ := requests.Get("https://httpbin.org/get")
@@ -30,7 +30,7 @@ func TestResponse(t *testing.T) {
 
 // Test response headers
 func TestResponseHeader(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, _ := requests.Get("https://httpbin.org/get")
@@ -45,7 +45,7 @@ func TestResponseHeader(t *testing.T) {
 
 // Test response body
 func TestResponseBody(t *testing.T) {
-	ts := createHttpbinServer(false)
+	ts := createHttpbinServer(0)
 	defer ts.Close()
 
 	// resp, _ := requests.Get("https://httpbin.org/get")

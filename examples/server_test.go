@@ -17,7 +17,12 @@ import (
 
 const maxMultipartMemory = 4 << 30 // 4MB
 
-func createHttpbinServer(isTls bool) (ts *httptest.Server) {
+// tlsCert:
+//
+//	0 no certificate
+//	1 with self-signed certificate
+//	2 with custom certificate from CA
+func createHttpbinServer(tlsCert int) (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		switch path := r.URL.Path; {
 		case path == "/get":
@@ -33,7 +38,7 @@ func createHttpbinServer(isTls bool) (ts *httptest.Server) {
 		default:
 			_, _ = w.Write([]byte("404 " + path))
 		}
-	}, isTls)
+	}, tlsCert)
 
 	return ts
 }
@@ -178,7 +183,7 @@ func createEchoServer() (ts *httptest.Server) {
 	ts = createTestServer(func(w http.ResponseWriter, r *http.Request) {
 		res := dumpRequest(r)
 		_, _ = w.Write([]byte(res))
-	}, false)
+	}, 0)
 
 	return ts
 }
@@ -211,18 +216,30 @@ func dumpRequest(request *http.Request) string {
 	return r.String()
 }
 
-func createTestServer(fn func(w http.ResponseWriter, r *http.Request), isTls bool) (ts *httptest.Server) {
-	if !isTls {
+/*
+*
+  - tlsCert:
+    0 no certificate
+    1 with self-signed certificate
+    2 with custom certificate from CA
+*/
+func createTestServer(fn func(w http.ResponseWriter, r *http.Request), tlsCert int) (ts *httptest.Server) {
+	if tlsCert == 0 {
 		// 1. http test server
 		ts = httptest.NewServer(http.HandlerFunc(fn))
 	} else {
 		// 2. https test server: https://stackoverflow.com/questions/54899550/create-https-test-server-for-any-client
 		ts = httptest.NewUnstartedServer(http.HandlerFunc(fn))
-		cert, err := tls.LoadX509KeyPair("./conf/local.com.crt", "./conf/local.com.key")
-		if err != nil {
-			panic(err)
+
+		// 3. use own cert
+		if tlsCert == 2 {
+			cert, err := tls.LoadX509KeyPair("./conf/local.com.crt", "./conf/local.com.key")
+			if err != nil {
+				panic(err)
+			}
+			_ = cert
+			ts.TLS = &tls.Config{Certificates: []tls.Certificate{cert}}
 		}
-		ts.TLS = &tls.Config{Certificates: []tls.Certificate{cert}}
 		ts.StartTLS()
 	}
 	return ts
