@@ -35,7 +35,7 @@ func TestSkipSsl(t *testing.T) {
 	}
 }
 
-func TestSetTransport(t *testing.T) {
+func TestSslSkipViaTransport(t *testing.T) {
 	// 1. create tls test server
 	ts := createHttpbinServer(2)
 	defer ts.Close()
@@ -81,9 +81,9 @@ func TestSslCertSelf(t *testing.T) {
 		}
 	}
 
-	// 3. skip ssl & proxy connect
+	// 3. 代替 session.SetCaCert("tmp/ca.crt")
+	// 3. with RootCAs & proxy connect
 	tsp := session.GetTransport()
-	_ = tsp
 	tsp.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		// not connect to a proxy server,, keep pathname only
 		return net.Dial("tcp", ts.URL[strings.LastIndex(ts.URL, "/")+1:])
@@ -103,7 +103,7 @@ func TestSslCertSelf(t *testing.T) {
 	}
 }
 
-// go test -timeout 6000s -run '^TestSslCert$'   github.com/ahuigo/requests/examples -v -httptest.serve=127.0.0.1:443
+// go test -timeout 6000s -run '^TestSslCertCa$'   github.com/ahuigo/requests/examples -v -httptest.serve=127.0.0.1:443
 func TesSslCertCa(t *testing.T) {
 	// 1. create tls test server
 	ts := createHttpbinServer(2)
@@ -113,7 +113,13 @@ func TesSslCertCa(t *testing.T) {
 
 	// 2. fake CA certificate
 	session.SetCaCert("conf/rootCA.crt")
+	tsp := session.GetTransport()
+	tsp.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		// not connect to a proxy server,, keep pathname only
+		return net.Dial("tcp", ts.URL[strings.LastIndex(ts.URL, "/")+1:])
+	}
 
+	// url := ts.URL
 	url := strings.Replace(ts.URL, "127.0.0.1", "local.com", 1) + "/get?a=1"
 	t.Log(url)
 	// time.Sleep(10 * time.Minute)

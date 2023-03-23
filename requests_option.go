@@ -81,6 +81,11 @@ func (session *Session) GetTransport() *http.Transport {
 	return transport.(*http.Transport)
 }
 
+func (session *Session) SetTransport(tsp *http.Transport) *Session {
+	session.Client.Transport = tsp
+	return session
+}
+
 func (session *Session) SetRespHandler(fn func(*Response) error) *Session {
 	session.respHandler = fn
 	return session

@@ -95,12 +95,12 @@ func sleepHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	regx := regexp.MustCompile(`^/sleep/(\d+)`)
 	res := regx.FindStringSubmatch(r.URL.Path) // res may be: []string(nil)
-	seconds := 0
+	miliseconds := 0
 	if res != nil {
-		seconds, _ = strconv.Atoi(res[1])
+		miliseconds, _ = strconv.Atoi(res[1])
 	}
-	time.Sleep(time.Duration(seconds) * time.Second)
-	out := fmt.Sprintf("sleep %ds", seconds)
+	time.Sleep(time.Duration(miliseconds) * time.Microsecond)
+	out := fmt.Sprintf("sleep %d ms", miliseconds)
 	_, _ = w.Write([]byte(out))
 }
 
