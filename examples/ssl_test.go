@@ -103,24 +103,23 @@ func TestSslCertSelf(t *testing.T) {
 	}
 }
 
-// go test -timeout 6000s -run '^TestSslCertCa$'   github.com/ahuigo/requests/examples -v -httptest.serve=127.0.0.1:443
-func TesSslCertCa(t *testing.T) {
+// go test -timeout 6000s -run '^TesSslCertCustom$'   github.com/ahuigo/requests/examples -v -httptest.serve=127.0.0.1:443
+func TesSslCertCustom(t *testing.T) {
 	// 1. create tls test server
 	ts := createHttpbinServer(2)
 	defer ts.Close()
 
 	session := requests.R()
 
-	// 2. fake CA certificate
-	session.SetCaCert("conf/rootCA.crt")
+	// 2. fake CA or self-signed certificate like nginx.crt
+	session.SetCaCert("conf/nginx.crt")
 	tsp := session.GetTransport()
 	tsp.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		// not connect to a proxy server,, keep pathname only
 		return net.Dial("tcp", ts.URL[strings.LastIndex(ts.URL, "/")+1:])
 	}
 
-	// url := ts.URL
-	url := strings.Replace(ts.URL, "127.0.0.1", "local.com", 1) + "/get?a=1"
+	url := strings.Replace(ts.URL, "127.0.0.1", "local.self", 1) + "/get?a=1"
 	t.Log(url)
 	// time.Sleep(10 * time.Minute)
 	// 4. send get request

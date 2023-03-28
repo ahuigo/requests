@@ -233,7 +233,7 @@ func createTestServer(fn func(w http.ResponseWriter, r *http.Request), tlsCert i
 
 		// 3. use own cert
 		if tlsCert == 2 {
-			cert, err := tls.LoadX509KeyPair("./conf/local.com.crt", "./conf/local.com.key")
+			cert, err := tls.LoadX509KeyPair("./conf/nginx.crt", "./conf/nginx.key")
 			if err != nil {
 				panic(err)
 			}
