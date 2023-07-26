@@ -8,7 +8,7 @@ import (
 	"github.com/ahuigo/requests"
 )
 
-func TestGetDebug(t *testing.T) {
+func TestDebugRequestAndResponse(t *testing.T) {
 	ts := createHttpbinServer(0)
 	defer ts.Close()
 
@@ -39,7 +39,7 @@ func TestGetDebug(t *testing.T) {
 	}
 }
 
-func TestDebugRequestAndResponse(t *testing.T) {
+func TestDebugCurl(t *testing.T) {
 	ts := createHttpbinServer(0)
 	defer ts.Close()
 

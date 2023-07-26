@@ -217,6 +217,7 @@ func (session *Session) reset() {
 func (session *Session) Clone() *Session {
 	newSession := R()
 	newSession.isdebug = session.isdebug
+	newSession.isdebugBody = session.isdebugBody
 
 	// 1. clone temp cookies
 	newSession.initCookies = session.initCookies
