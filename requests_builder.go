@@ -169,7 +169,7 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		session.setBodyBytes(bodyBytes)
 	}
 	if session.httpreq.Body == nil && session.httpreq.Method != "GET" {
-		session.setBodyBytes([]byte{})
+		session.httpreq.Body = http.NoBody
 	}
 
 	// set header
