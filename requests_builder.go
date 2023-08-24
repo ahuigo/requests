@@ -168,6 +168,9 @@ func (session *Session) BuildRequest(method, origurl string, args ...interface{}
 		session.setContentType("text/plain")
 		session.setBodyBytes(bodyBytes)
 	}
+	if session.httpreq.Body == nil && session.httpreq.Method != "GET" {
+		session.setBodyBytes([]byte{})
+	}
 
 	// set header
 	for key, value := range session.gHeader {
