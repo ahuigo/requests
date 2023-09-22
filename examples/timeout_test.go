@@ -25,5 +25,6 @@ func TestClose(t *testing.T) {
 
 func TestTimeout(t *testing.T) {
 	req := requests.R().SetTimeout(time.Second)
-	req.Get("http://golang.org")
+	_, err := req.Get("http://golang.org")
+	t.Log(err)
 }

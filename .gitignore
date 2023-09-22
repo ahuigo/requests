@@ -1,3 +1,4 @@
 /tmp
 /go.sum
 /.vscode
+.DS_Store
