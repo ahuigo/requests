@@ -41,8 +41,8 @@ func (session *Session) SetProxy(proxyurl string) *Session {
 }
 
 // In generally, you could SystemCertPool instead of NewCertPool to keep existing certs.
-func (session *Session) SetRootCertificate(caCertPath string) *Session {
-	caCert, err := ioutil.ReadFile(caCertPath)
+func (session *Session) SetRootCertificate(caPemPath string) *Session {
+	caCert, err := ioutil.ReadFile(caPemPath)
 	if err != nil {
 		panic(err)
 	}
