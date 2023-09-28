@@ -20,7 +20,7 @@ func TestSkipSsl(t *testing.T) {
 	session := requests.R()
 
 	// 2. fake CA certificate
-	// session.SetCaCert("conf/rootCA.crt")
+	// session.SetRootCertificate("conf/rootCA.crt")
 
 	// 3. skip ssl
 	session = session.SkipSsl(true)
@@ -81,7 +81,7 @@ func TestSslCertSelf(t *testing.T) {
 		}
 	}
 
-	// 3. 代替 session.SetCaCert("tmp/ca.crt")
+	// 3. 代替 session.SetRootCertificate("tmp/ca.crt")
 	// 3. with RootCAs & proxy connect
 	tsp := session.GetTransport()
 	tsp.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -112,7 +112,7 @@ func TesSslCertCustom(t *testing.T) {
 	session := requests.R()
 
 	// 2. fake CA or self-signed certificate like nginx.crt
-	session.SetCaCert("conf/nginx.crt")
+	session.SetRootCertificate("conf/nginx.crt")
 	tsp := session.GetTransport()
 	tsp.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		// not connect to a proxy server,, keep pathname only
