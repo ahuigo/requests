@@ -11,5 +11,5 @@ pkg: gitcheck test
 	v=`cat version` && git tag "$$v" && git push origin "$$v" && git push origin HEAD
 
 test:
-	go test -v ./examples
+	go test -failfast -v ./examples
 

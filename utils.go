@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/alessio/shellescape"
+	"github.com/ahuigo/requests/shellescape"
 )
 
 // BuildRequest -
