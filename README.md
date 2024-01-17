@@ -3,6 +3,36 @@
 Requests is an HTTP library like python requests.
 
 
+- [Requests](#requests)
+- [Installation](#installation)
+- [Examples](#examples)
+  - [Get](#get)
+  - [Post](#post)
+    - [Debug Mode](#debug-mode)
+    - [Post params](#post-params)
+      - [Post application/x-www-form-urlencoded](#post-applicationx-www-form-urlencoded)
+    - [Post multipart/form-data](#post-multipartform-data)
+    - [Post Json: application/json](#post-json-applicationjson)
+    - [Post Raw text/plain](#post-raw-textplain)
+    - [PostFiles](#postfiles)
+  - [Session Support](#session-support)
+  - [Request Options](#request-options)
+    - [SetTimeout](#settimeout)
+    - [Set Authentication](#set-authentication)
+    - [Set Cookie](#set-cookie)
+    - [Set header](#set-header)
+  - [Response](#response)
+    - [Fetch Response Body](#fetch-response-body)
+    - [Fetch Response Cookies](#fetch-response-cookies)
+    - [Response examples](#response-examples)
+- [Utils](#utils)
+  - [Build Request](#build-request)
+  - [Generate curl shell command](#generate-curl-shell-command)
+  - [Retry request](#retry-request)
+- [Feature Support](#feature-support)
+- [Thanks](#thanks)
+
+
 # Installation
 
 ```
