@@ -30,6 +30,10 @@ func (session *Session) SetDebugBody() *Session {
 	session.isdebugBody = true
 	return session
 }
+func (session *Session) SetDoNotCloseBody(flag bool) *Session {
+	session.doNotCloseBody = flag
+	return session
+}
 func (session *Session) DisableDebug() *Session {
 	session.isdebug = false
 	session.isdebugBody = false

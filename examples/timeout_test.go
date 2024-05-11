@@ -9,7 +9,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-func TestClose(t *testing.T) {
+func TestKeepaliveClose(t *testing.T) {
 	req := requests.R()
 	for i := 0; i < 10; i++ {
 		_, err := req.Post(
@@ -21,6 +21,24 @@ func TestClose(t *testing.T) {
 
 	spew.Dump(req)
 	fmt.Println("10 times get test end.")
+}
+
+func TestBodyNotClose(t *testing.T) {
+	ts := createHttpbinServer(0)
+	defer ts.Close()
+
+	// Do not close body
+	session := requests.R().SetDoNotCloseBody(true)
+	resp, err := session.Get(ts.URL + "/get")
+	if err == nil {
+		var json map[string]interface{}
+		err = resp.Json(&json)
+		t.Logf("response json:%#v\n", json)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.R.Body.Close() // close body manually
 }
 
 func TestTimeout(t *testing.T) {

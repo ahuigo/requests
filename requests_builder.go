@@ -22,9 +22,12 @@ type Session struct {
 	isdebugBody bool
 	respHandler func(*Response) error
 	// session header
-	gHeader            map[string]string
-	initCookies        []*http.Cookie
-	initContext        context.Context
+	gHeader     map[string]string
+	initCookies []*http.Cookie
+	initContext context.Context
+	// connection
+	doNotCloseBody bool
+	// retry
 	retryCount         int
 	retryWaitTime      time.Duration
 	retryConditionFunc func(*Response, error) bool

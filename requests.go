@@ -86,6 +86,7 @@ func (session *Session) execute(origurl string, args ...interface{}) (resp *Resp
 		client:      session.Client,
 		isdebug:     session.isdebug,
 		isdebugBody: session.isdebugBody,
+		doNotCloseBody: session.doNotCloseBody,
 	}
 	resp.ResponseDebug()
 	resp.SetStartEndTime(startTime, time.Now())

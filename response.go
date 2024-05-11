@@ -26,18 +26,19 @@ import (
 )
 
 type Response struct {
-	R            *http.Response
-	Attempt      int
-	body         []byte
-	httpreq      *http.Request
-	client       *http.Client
-	TraceInfo    *TraceInfo
-	isdebug      bool
-	isdebugBody  bool
-	startTime    time.Time
-	endTime      time.Time
-	dumpCurl     string
-	dumpResponse string
+	R              *http.Response
+	Attempt        int
+	body           []byte
+	doNotCloseBody bool
+	httpreq        *http.Request
+	client         *http.Client
+	TraceInfo      *TraceInfo
+	isdebug        bool
+	isdebugBody    bool
+	startTime      time.Time
+	endTime        time.Time
+	dumpCurl       string
+	dumpResponse   string
 }
 
 func BuildResponse(response *http.Response) *Response {
@@ -52,6 +53,11 @@ func BuildResponse(response *http.Response) *Response {
 
 func (resp *Response) GetReq() (req *http.Request) {
 	return resp.httpreq
+}
+
+func (resp *Response) SetDoNotCloseBody() *Response {
+	resp.doNotCloseBody = true
+	return resp
 }
 
 func (resp *Response) SetClientReq(req *http.Request, client *http.Client) *Response {
@@ -105,7 +111,9 @@ func (resp *Response) Body() []byte {
 		return resp.body
 	}
 	resp.body = []byte{}
-	defer resp.R.Body.Close()
+	if !resp.doNotCloseBody {
+		defer resp.R.Body.Close()
+	}
 
 	var Body = resp.R.Body
 	if resp.R.Header.Get("Content-Encoding") == "gzip" {
